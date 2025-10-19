@@ -30,8 +30,11 @@ model DimClient {
 model DimMember {
   id         String   @id @default(cuid())
   clientId   String
+  name       String
+  age        Int
   dob        DateTime
   gender     String
+  zipCode    String
   riskBand   String
   planId     String
   createdAt  DateTime @default(now())
@@ -59,6 +62,8 @@ model FactNotification {
   clientId    String?
   ruleKey     String
   entityRef   String
+  message     String
+  recommendedAction String
   severity    String
   owner       String
   slaHours    Int

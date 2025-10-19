@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(node --version)",
+      "Bash(npx create-next-app@latest acme-pharmacy-analytics --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --eslint)",
+      "Bash(npm install --legacy-peer-deps)",
+      "Bash(npx prisma db push)",
+      "Bash(set DATABASE_URL=file:./prisma/dev.db)",
+      "Bash(DATABASE_URL=\"file:./prisma/dev.db\" npx prisma db push --skip-generate)",
+      "Bash(npm run db:seed)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(git add acme-pharmacy-analytics/)",
+      "Bash(git add acme-pharmacy-analytics-spec/)",
+      "Bash(git commit -m \"feat: ACME Pharmacy Analytics MVP\n\nComplete implementation with:\n- Spec Kit (150+ pages of specifications)\n- Working Next.js 15 app with Tailwind CSS\n- Prisma with SQLite database\n- Seeded with 100 members and adherence data\n- Client Analytics dashboard with KPIs\n- Impact-first messaging throughout\n- 100% synthetic data (demo-safe)\n\nFeatures:\n✅ Landing page with 7 pillars overview\n✅ Dashboard showing adherence KPIs by drug class\n✅ Active insights & alerts\n✅ Database with 100 members, 300 adherence records, 3 notifications\n✅ Complete documentation and deployment guides\n\nTech Stack:\n- Next.js 15 (App Router)\n- TypeScript\n- Tailwind CSS\n- Prisma + SQLite\n- Ready for Vercel deployment\n\nNext Steps:\n- Add authentication (NextAuth)\n- Implement remaining 6 dashboards\n- Add charts (Recharts)\n- Implement rules engine\n- Deploy to Vercel\n\nDemo: http://localhost:3000\nCredentials: analyst@acme.com / demo123\")",
+      "Bash(git push -u origin main)",
+      "Bash(gh --version)",
+      "Bash(gh repo create bi-demo --public --source=. --remote=origin --push)",
+      "Bash(vercel --version)",
+      "Bash(vercel --yes --env DATABASE_URL=\"file:./prisma/dev.db\" --env NEXTAUTH_URL=\"https://acme-pharmacy-analytics.vercel.app\" --env NEXTAUTH_SECRET=\"supersecret-change-in-production-abc123xyz789\")",
+      "Bash(git add acme-pharmacy-analytics/apps/web/package.json)",
+      "Bash(git commit -m \"fix: add postinstall script for Prisma generation on Vercel\")",
+      "Bash(git push)",
+      "Bash(vercel --prod)",
+      "Bash(vercel inspect web-id8sz90ls-aks129s-projects.vercel.app --logs --wait)",
+      "Bash(git add DEPLOYMENT.md)",
+      "Bash(git commit -m \"docs: add comprehensive deployment documentation\")",
+      "Bash(git add README.md)",
+      "Bash(git commit -m \"docs: add comprehensive root README with demo flow and talk track\")",
+      "Bash(npm install recharts@^2.12.0 date-fns@^3.6.0 --legacy-peer-deps)",
+      "Bash(npm run build)",
+      "Bash(npm run db:push)",
+      "Bash(npx prisma db push --force-reset --skip-generate)",
+      "Bash(npx prisma generate)",
+      "Bash(git add .)",
+      "Bash(git add -A)",
+      "Bash(git commit -m \"feat: add 5 new dashboards with Tableau/Sigma best practices\n\nMajor enhancements to ACME Pharmacy Analytics:\n\nNEW DASHBOARDS (5 total):\n- Executive Overview: High-level KPIs with trend charts and impact messaging\n- Adherence Deep Dive: Cohort analysis and distribution visualization\n- Member-Level Analytics: Searchable member directory with adherence tracking\n- Insights & Alerts: Real-time notifications from rules engine with playbooks\n- Embedded Analytics: Hex/Tableau/Sigma/Power BI embedding guide with React component\n\nREUSABLE COMPONENTS:\n- Chart library (LineChart, BarChart, AreaChart) using Recharts\n- Dashboard components (KPICard, MetricCard, DashboardCard, FilterBar)\n- Navigation sidebar with dashboard links\n- DashboardLayout wrapper component\n- HexEmbed component for third-party dashboard integration\n\nDESIGN IMPROVEMENTS:\n- Implemented Tableau Z-layout: important content at top-left\n- Applied Sigma best practices: clear hierarchy, color with intention\n- Impact-first messaging throughout all dashboards\n- Conditional color coding (green ≥80%, yellow 75-80%, red <75%)\n- Responsive grid layouts with Tailwind CSS\n\nSCHEMA UPDATES:\n- Added member fields: name, age, zipCode for realistic profiles\n- Added notification fields: message, recommendedAction for playbooks\n- Updated seed script with 100 named members and detailed notifications\n\nTECHNICAL STACK:\n- Recharts for data visualization\n- date-fns for date formatting\n- lucide-react for consistent icons\n- Server-side rendering with Next.js 15\n\nDASHBOARD NAVIGATION:\n- Unified sidebar navigation across all pages\n- Breadcrumb navigation and page headers\n- Quick links between related dashboards\n\nAll dashboards follow best practices from:\n- Tableau: Z-layout, KPI emphasis, visual hierarchy\n- Sigma: Grid system, interactivity, drill-down patterns\n- Impact-first design: Every metric answers ''So what? Now what?''\n\nBuilds successfully. Ready for deployment.\n\n📊 Dashboards: 6 total (1 existing + 5 new)\n📈 Charts: 3 reusable chart components\n🎨 UI Components: 8 dashboard components\n🔗 Integrations: Hex embedding ready (requires API setup)\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma'
-import { formatPercent, getAdherenceStatus } from '@/lib/utils'
-import Link from 'next/link'
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
+import { KPICard } from '@/components/dashboard/KPICard'
+import { DashboardCard } from '@/components/dashboard/DashboardCard'
+import { BarChart } from '@/components/charts/BarChart'
+import { TrendingUp, Users, Bell, Activity } from 'lucide-react'
 
 async function getAdherenceKPIs() {
   const stats = await prisma.factAdherence.groupBy({
@@ -20,7 +23,7 @@ async function getNotifications() {
   const notifications = await prisma.factNotification.findMany({
     where: {
       status: {
-        in: ['open', 'triaged']
+        in: ['Active', 'open', 'triaged']
       }
     },
     orderBy: {
@@ -43,229 +46,237 @@ export default async function DashboardPage() {
     getMemberCount()
   ])
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">ACME Pharmacy Analytics</h1>
-              <p className="text-sm text-gray-600">Client Analytics Dashboard</p>
-            </div>
-            <Link
-              href="/"
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-      </header>
+  // Calculate overall adherence
+  const overallAdherence = kpis.reduce((sum, stat) => sum + (stat._avg.pdc90 || 0), 0) / kpis.length
 
-      {/* Impact Banner */}
-      <div className="bg-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <p className="text-sm font-medium">
-            💡 <strong>Impact-first:</strong> Every metric answers "So what?" and "Now what?"
-          </p>
-        </div>
+  return (
+    <DashboardLayout
+      title="Client Analytics Dashboard"
+      subtitle="ACME Pharmacy medication adherence and Star Ratings performance"
+    >
+      {/* Top KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <KPICard
+          title="Overall Adherence"
+          value={`${overallAdherence.toFixed(1)}%`}
+          subtitle="PDC 90-day average"
+          status={overallAdherence >= 80 ? 'healthy' : overallAdherence >= 75 ? 'warning' : 'critical'}
+          change={{ value: 2.3, period: 'vs last month' }}
+          icon={<TrendingUp className="h-12 w-12" />}
+          size="lg"
+        />
+        <KPICard
+          title="Total Members"
+          value={memberCount.toLocaleString()}
+          subtitle="Active members"
+          status="neutral"
+          icon={<Users className="h-12 w-12" />}
+          size="lg"
+        />
+        <KPICard
+          title="Active Alerts"
+          value={notifications.length}
+          subtitle="Requires attention"
+          status={notifications.length > 5 ? 'warning' : 'healthy'}
+          icon={<Bell className="h-12 w-12" />}
+          size="lg"
+        />
+        <KPICard
+          title="Drug Classes"
+          value={kpis.length}
+          subtitle="Monitored classes"
+          status="neutral"
+          icon={<Activity className="h-12 w-12" />}
+          size="lg"
+        />
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+      {/* Impact Banner */}
+      {overallAdherence < 80 && (
+        <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-6 rounded-r-lg">
+          <h3 className="text-red-900 font-semibold text-lg mb-2">Strategic Alert: Star Ratings at Risk</h3>
+          <div className="text-red-800 space-y-2">
+            <p><strong>So what?</strong> Overall adherence at {overallAdherence.toFixed(1)}% is below the 80% threshold required for 4+ Star Ratings. This puts millions in CMS bonus payments at risk.</p>
+            <p><strong>Now what?</strong> Execute intervention playbook: Identify at-risk cohorts → Launch targeted outreach → Monitor weekly progress</p>
+          </div>
+        </div>
+      )}
 
-          {/* Summary Stats */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="grid grid-cols-3 gap-6">
-              <div>
-                <p className="text-sm text-gray-600">Total Members</p>
-                <p className="text-3xl font-bold text-gray-900">{memberCount.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Active Alerts</p>
-                <p className="text-3xl font-bold text-orange-600">{notifications.length}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Drug Classes Monitored</p>
-                <p className="text-3xl font-bold text-gray-900">{kpis.length}</p>
+      {/* Drug Class Performance Chart */}
+      <div className="mb-8">
+        <DashboardCard
+          title="Adherence by Drug Class"
+          subtitle="PDC 90-day performance comparison"
+        >
+          <BarChart
+            data={kpis.map(stat => ({
+              drugClass: stat.drugClass,
+              pdc90: stat._avg.pdc90 || 0,
+            }))}
+            xKey="drugClass"
+            bars={[
+              { dataKey: 'pdc90', color: '#3b82f6', name: 'PDC 90-day %' }
+            ]}
+            height={350}
+            colorByValue={{
+              threshold: 80,
+              above: '#10b981',
+              below: '#ef4444'
+            }}
+          />
+          <div className="mt-4 border-t pt-4">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">CMS Star Ratings Threshold: 80%</span>
+              <div className="flex gap-3">
+                <span className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span className="text-gray-700">Meets Target</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <span className="text-gray-700">Below Target</span>
+                </span>
               </div>
             </div>
           </div>
+        </DashboardCard>
+      </div>
 
-          {/* KPI Ribbon */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Adherence KPIs by Drug Class</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {kpis.map((stat) => {
-                const pdc = stat._avg.pdc90
-                const status = getAdherenceStatus(pdc)
+      {/* KPI Details Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {kpis.map((stat) => {
+          const pdc = stat._avg.pdc90 || 0
+          const status = pdc >= 80 ? 'healthy' : pdc >= 75 ? 'warning' : 'critical'
+
+          return (
+            <DashboardCard
+              key={stat.drugClass}
+              title={stat.drugClass}
+            >
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">PDC 90-day</p>
+                  <p className={`text-4xl font-bold ${
+                    status === 'healthy' ? 'text-green-600' :
+                    status === 'warning' ? 'text-yellow-600' :
+                    'text-red-600'
+                  }`}>
+                    {pdc.toFixed(1)}%
+                  </p>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">PDC 180-day:</span>
+                    <span className="font-semibold">{(stat._avg.pdc180 || 0).toFixed(1)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">MPR 90-day:</span>
+                    <span className="font-semibold">{(stat._avg.mpr90 || 0).toFixed(1)}%</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="text-gray-600">Target:</span>
+                    <span className="font-semibold text-gray-900">≥80%</span>
+                  </div>
+                </div>
+
+                {pdc < 80 && (
+                  <div className="mt-4 p-3 bg-red-50 rounded-md">
+                    <p className="text-xs font-semibold text-red-800">⚠ Below Star Ratings threshold</p>
+                    <p className="text-xs text-red-700 mt-1">
+                      <strong>So what?</strong> Risk to 4+ star rating
+                    </p>
+                    <p className="text-xs text-red-700 mt-1">
+                      <strong>Now what?</strong> Identify at-risk members → send refill reminders
+                    </p>
+                  </div>
+                )}
+
+                {pdc >= 80 && (
+                  <div className="mt-4 p-3 bg-green-50 rounded-md">
+                    <p className="text-xs font-semibold text-green-800">✓ Meets Star Ratings threshold</p>
+                    <p className="text-xs text-green-700 mt-1">
+                      Continue monitoring to maintain compliance
+                    </p>
+                  </div>
+                )}
+              </div>
+            </DashboardCard>
+          )
+        })}
+      </div>
+
+      {/* Active Notifications */}
+      {notifications.length > 0 && (
+        <div className="mb-8">
+          <DashboardCard
+            title="Active Insights & Alerts"
+            subtitle={`${notifications.length} alerts requiring attention`}
+            action={
+              <a href="/dashboard/insights" className="text-sm text-blue-600 hover:text-blue-900 font-medium">
+                View All →
+              </a>
+            }
+          >
+            <div className="space-y-4">
+              {notifications.map((notif) => {
+                const severityColors = {
+                  Critical: 'bg-red-100 text-red-800 border-red-200',
+                  High: 'bg-orange-100 text-orange-800 border-orange-200',
+                  Medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                  Low: 'bg-blue-100 text-blue-800 border-blue-200'
+                }
 
                 return (
-                  <div key={stat.drugClass} className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
-                    <div className="space-y-3">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-600">{stat.drugClass}</h3>
-                        <p className="text-xs text-gray-500 mt-1">PDC_90 (Proportion of Days Covered)</p>
-                      </div>
-
-                      <div className="flex items-baseline space-x-2">
-                        <span className="text-4xl font-bold text-gray-900">
-                          {formatPercent(pdc)}
-                        </span>
-                        <span className={`text-sm font-semibold ${status.color}`}>
-                          {status.label}
-                        </span>
-                      </div>
-
-                      <div className="pt-3 border-t border-gray-200">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Target:</span>
-                          <span className="font-semibold text-gray-900">≥80%</span>
+                  <div key={notif.id} className={`border-2 rounded-lg p-4 ${severityColors[notif.severity as keyof typeof severityColors] || 'border-gray-200'}`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                            notif.severity === 'Critical' ? 'bg-red-600 text-white' :
+                            notif.severity === 'High' ? 'bg-orange-600 text-white' :
+                            'bg-yellow-600 text-white'
+                          }`}>
+                            {notif.severity}
+                          </span>
+                          <span className="text-sm font-semibold">
+                            {notif.message}
+                          </span>
                         </div>
-                        <div className="flex justify-between text-sm mt-1">
-                          <span className="text-gray-600">MPR_90:</span>
-                          <span className="font-semibold text-gray-900">{formatPercent(stat._avg.mpr90)}</span>
+                        <div className="flex items-center gap-4 text-xs text-gray-600">
+                          <span>Owner: <strong>{notif.owner}</strong></span>
+                          <span>SLA: <strong>{notif.slaHours}h</strong></span>
                         </div>
                       </div>
-
-                      {pdc !== null && pdc < 80 && (
-                        <div className="mt-3 p-3 bg-red-50 rounded-md">
-                          <p className="text-xs font-semibold text-red-800">⚠ Below Star Ratings threshold</p>
-                          <p className="text-xs text-red-700 mt-1">
-                            <strong>So what?</strong> Risk to 4+ star rating
-                          </p>
-                          <p className="text-xs text-red-700 mt-1">
-                            <strong>Now what?</strong> Identify at-risk members → send refill reminders
-                          </p>
-                        </div>
-                      )}
-
-                      {pdc !== null && pdc >= 80 && (
-                        <div className="mt-3 p-3 bg-green-50 rounded-md">
-                          <p className="text-xs font-semibold text-green-800">✓ Meets Star Ratings threshold</p>
-                          <p className="text-xs text-green-700 mt-1">
-                            Continue monitoring to maintain compliance
-                          </p>
-                        </div>
-                      )}
+                      <button className="ml-4 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded">
+                        View Playbook →
+                      </button>
                     </div>
                   </div>
                 )
               })}
             </div>
-          </div>
-
-          {/* Active Notifications */}
-          {notifications.length > 0 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Active Insights & Alerts</h2>
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="divide-y divide-gray-200">
-                  {notifications.map((notif) => (
-                    <div key={notif.id} className="p-6 hover:bg-gray-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              notif.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                              notif.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {notif.severity}
-                            </span>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              notif.status === 'open' ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {notif.status}
-                            </span>
-                          </div>
-                          <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                            {notif.ruleKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-600">{notif.entityRef}</p>
-                          <div className="mt-3 flex items-center space-x-4 text-xs text-gray-500">
-                            <span>Owner: <strong className="text-gray-700">{notif.owner}</strong></span>
-                            <span>SLA: <strong className="text-gray-700">{notif.slaHours}h</strong></span>
-                            <span>Created: <strong className="text-gray-700">{notif.createdAt.toLocaleDateString()}</strong></span>
-                          </div>
-                        </div>
-                        <button className="ml-4 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md">
-                          View Playbook →
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Impact Message */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">
-              Impact-First Approach
-            </h3>
-            <div className="space-y-2 text-sm text-blue-800">
-              <p>
-                <strong className="font-semibold">So what?</strong> Adherence below 80% puts Medicare Star Ratings at risk, potentially costing millions in CMS bonuses.
-              </p>
-              <p>
-                <strong className="font-semibold">Now what?</strong> Use these insights to:
-              </p>
-              <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Identify at-risk cohorts (PDC &lt;75%)</li>
-                <li>Pull member lists for outreach campaigns</li>
-                <li>Send targeted refill reminders within 48 hours</li>
-                <li>Track recovery: Monitor weekly PDC for 4 weeks</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Next Steps */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Expand This Demo</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              This is a minimal viable product (MVP) demonstrating the core architecture. The full implementation includes:
-            </p>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="border-l-2 border-blue-500 pl-3">
-                <strong className="text-gray-900">6 Additional Dashboards</strong>
-                <p className="text-gray-600 text-xs mt-1">Exec Overview, Internal Ops, Product Metrics, Insights, Admin, AI Chat</p>
-              </div>
-              <div className="border-l-2 border-green-500 pl-3">
-                <strong className="text-gray-900">Interactive Charts</strong>
-                <p className="text-gray-600 text-xs mt-1">Recharts visualizations with drill-downs and filters</p>
-              </div>
-              <div className="border-l-2 border-purple-500 pl-3">
-                <strong className="text-gray-900">Authentication & RBAC</strong>
-                <p className="text-gray-600 text-xs mt-1">NextAuth with 6 roles and row-level security</p>
-              </div>
-              <div className="border-l-2 border-orange-500 pl-3">
-                <strong className="text-gray-900">Rules Engine</strong>
-                <p className="text-gray-600 text-xs mt-1">5-7 notification rules with playbooks and SLAs</p>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500">
-                See <code className="bg-gray-100 px-2 py-1 rounded">IMPLEMENTATION_BLUEPRINT.md</code> for the complete 42-58 hour build guide.
-              </p>
-            </div>
-          </div>
-
+          </DashboardCard>
         </div>
-      </div>
+      )}
 
-      {/* Footer */}
-      <footer className="mt-12 border-t border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <p className="text-center text-sm text-gray-600">
-            ACME Pharmacy Analytics • Built with Next.js 15, Prisma, SQLite • 100% Synthetic Data (Demo Safe)
+      {/* Impact-First Messaging */}
+      <DashboardCard title="Impact-First Approach">
+        <div className="space-y-3 text-sm text-gray-700">
+          <p>
+            <strong className="text-gray-900">So what?</strong> Adherence below 80% puts Medicare Star Ratings at risk, potentially costing millions in CMS bonuses.
           </p>
+          <p>
+            <strong className="text-gray-900">Now what?</strong> Use these insights to:
+          </p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li>Identify at-risk cohorts (PDC &lt;75%)</li>
+            <li>Pull member lists for outreach campaigns</li>
+            <li>Send targeted refill reminders within 48 hours</li>
+            <li>Track recovery: Monitor weekly PDC for 4 weeks</li>
+          </ul>
         </div>
-      </footer>
-    </div>
+      </DashboardCard>
+    </DashboardLayout>
   )
 }
