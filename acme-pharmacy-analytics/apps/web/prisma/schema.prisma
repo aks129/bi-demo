@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String
+  orgId     String?
+  clientId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DimClient {
+  id        String   @id @default(cuid())
+  name      String
+  segment   String
+  region    String
+  createdAt DateTime @default(now())
+}
+
+model DimMember {
+  id         String   @id @default(cuid())
+  clientId   String
+  dob        DateTime
+  gender     String
+  riskBand   String
+  planId     String
+  createdAt  DateTime @default(now())
+
+  @@index([clientId])
+}
+
+model FactAdherence {
+  id          String   @id @default(cuid())
+  clientId    String
+  memberId    String
+  drugClass   String
+  pdc90       Float
+  pdc180      Float
+  mpr90       Float
+  asOfDate    DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([clientId])
+  @@index([asOfDate])
+}
+
+model FactNotification {
+  id          String    @id @default(cuid())
+  clientId    String?
+  ruleKey     String
+  entityRef   String
+  severity    String
+  owner       String
+  slaHours    Int
+  status      String
+  createdAt   DateTime  @default(now())
+  acknowledgedAt DateTime?
+  resolvedAt  DateTime?
+
+  @@index([status])
+}

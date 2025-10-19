@@ -1,0 +1,30 @@
+{
+  "name": "acme-pharmacy-analytics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ACME Pharmacy Analytics - Sigma-class analytics demo",
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "db:push": "npm run db:push --workspace=apps/web",
+    "db:seed": "npm run db:seed --workspace=apps/web",
+    "db:studio": "npm run db:studio --workspace=apps/web",
+    "test:e2e": "npm run test:e2e --workspace=apps/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
