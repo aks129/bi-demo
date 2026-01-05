@@ -1,6 +1,12 @@
 'use client'
 
-import { ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { ArrowUp, ArrowDown, Minus, TrendingUp } from 'lucide-react'
+
+interface Benchmark {
+  value: number | string
+  label: string
+  comparison?: 'above' | 'below' | 'at'
+}
 
 interface KPICardProps {
   title: string
@@ -13,6 +19,7 @@ interface KPICardProps {
   subtitle?: string
   icon?: React.ReactNode
   size?: 'sm' | 'md' | 'lg'
+  benchmark?: Benchmark
 }
 
 export function KPICard({
@@ -22,7 +29,8 @@ export function KPICard({
   status = 'neutral',
   subtitle,
   icon,
-  size = 'md'
+  size = 'md',
+  benchmark
 }: KPICardProps) {
   const statusColors = {
     healthy: 'border-green-200 bg-green-50',
@@ -58,6 +66,13 @@ export function KPICard({
     return 'text-gray-600'
   }
 
+  const getBenchmarkColor = () => {
+    if (!benchmark) return ''
+    if (benchmark.comparison === 'above') return 'text-green-600'
+    if (benchmark.comparison === 'below') return 'text-red-600'
+    return 'text-blue-600'
+  }
+
   return (
     <div className={`rounded-lg border-2 ${statusColors[status]} ${sizes[size].card} transition-all hover:shadow-md`}>
       <div className="flex items-start justify-between">
@@ -76,6 +91,13 @@ export function KPICard({
               {getTrendIcon()}
               <span>{Math.abs(change.value)}%</span>
               <span className="text-gray-500 font-normal">{change.period}</span>
+            </div>
+          )}
+          {benchmark && (
+            <div className={`flex items-center gap-1 mt-2 text-xs ${getBenchmarkColor()}`}>
+              <TrendingUp className="h-3 w-3" />
+              <span className="font-medium">{benchmark.value}</span>
+              <span className="text-gray-500">{benchmark.label}</span>
             </div>
           )}
         </div>

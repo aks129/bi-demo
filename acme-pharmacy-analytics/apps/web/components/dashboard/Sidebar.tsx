@@ -11,7 +11,11 @@ import {
   Settings,
   Home,
   BarChart3,
-  ExternalLink
+  ExternalLink,
+  ClipboardList,
+  DollarSign,
+  Shield,
+  Target
 } from 'lucide-react'
 
 const navigation = [
@@ -21,10 +25,17 @@ const navigation = [
   { name: 'Adherence Deep Dive', href: '/dashboard/adherence', icon: Activity },
   { name: 'Member Analytics', href: '/dashboard/members', icon: Users },
   { name: 'Insights & Alerts', href: '/dashboard/insights', icon: Bell },
-  { name: 'Embedded Analytics', href: '/dashboard/embedded', icon: ExternalLink },
+]
+
+const mtmNavigation = [
+  { name: 'MTM Performance', href: '/dashboard/mtm', icon: Target },
+  { name: 'Financial ROI', href: '/dashboard/roi', icon: DollarSign },
+  { name: '2025 Eligibility', href: '/dashboard/eligibility', icon: Shield },
+  { name: 'Work Queue', href: '/dashboard/work-queue', icon: ClipboardList },
 ]
 
 const secondaryNavigation = [
+  { name: 'Embedded Analytics', href: '/dashboard/embedded', icon: ExternalLink },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
@@ -40,7 +51,8 @@ export function Sidebar() {
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Analytics</p>
         {navigation.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -60,10 +72,37 @@ export function Sidebar() {
             </Link>
           )
         })}
+
+        {/* MTM Section */}
+        <div className="pt-4">
+          <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">MTM Program</p>
+          {mtmNavigation.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`
+                  flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
+                  ${isActive
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  }
+                `}
+              >
+                <item.icon className="h-5 w-5 mr-3" />
+                {item.name}
+                {item.name === '2025 Eligibility' && (
+                  <span className="ml-auto px-1.5 py-0.5 text-xs bg-amber-500 text-amber-950 rounded font-semibold">NEW</span>
+                )}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
       {/* Secondary Navigation */}
-      <div className="px-4 py-6 border-t border-gray-800">
+      <div className="px-4 py-4 border-t border-gray-800">
         {secondaryNavigation.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -90,12 +129,12 @@ export function Sidebar() {
         <div className="flex items-center">
           <div className="flex-shrink-0">
             <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-              JD
+              SK
             </div>
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-white">Demo User</p>
-            <p className="text-xs text-gray-400">analyst@acme.com</p>
+            <p className="text-sm font-medium text-white">Dr. Sarah Kim</p>
+            <p className="text-xs text-gray-400">pharmacist@acme.com</p>
           </div>
         </div>
       </div>

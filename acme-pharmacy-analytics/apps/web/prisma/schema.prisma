@@ -20,26 +20,86 @@ model User {
 }
 
 model DimClient {
-  id        String   @id @default(cuid())
-  name      String
-  segment   String
-  region    String
-  createdAt DateTime @default(now())
+  id               String   @id @default(cuid())
+  name             String
+  segment          String
+  region           String
+  cmsContractNumber String?  // H-number (e.g., H1234)
+  createdAt        DateTime @default(now())
 }
 
 model DimMember {
-  id         String   @id @default(cuid())
-  clientId   String
-  name       String
-  age        Int
-  dob        DateTime
-  gender     String
-  zipCode    String
-  riskBand   String
-  planId     String
-  createdAt  DateTime @default(now())
+  id                String   @id @default(cuid())
+  clientId          String
+  memberId          String?  @unique // External MTM patient ID
+  name              String
+  firstName         String?
+  lastName          String?
+  age               Int
+  dob               DateTime
+  gender            String
+  zipCode           String
+  riskBand          String
+  planId            String
+  primaryPharmacyId String?  // NCPDP ID
+
+  // 2025 CMS MTM Eligibility Fields
+  drugCostsYTD      Float    @default(0)
+  chronicDiseaseCount Int    @default(0)
+  chronicDiseases   String?  // Comma-separated list of conditions
+  activePartDMeds   Int      @default(0)
+  mtmEligible       Boolean  @default(false)
+  optOut            Boolean  @default(false)
+  priorityScore     Int      @default(0) // 0-100, for work queue
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
 
   @@index([clientId])
+  @@index([mtmEligible])
+}
+
+// MTM Activity/Claims Table - Tracks clinical interventions
+model Claim {
+  id              String   @id @default(cuid())
+  claimId         String   @unique  // External Service ID
+  clientId        String
+  memberId        String   // References DimMember.id
+
+  // Service Details
+  serviceDate     DateTime
+  serviceCode     Int      @default(99605) // CPT code
+  opportunityType String   // CMR, TIP (Targeted Intervention Program)
+
+  // Outcomes MTM Result Codes
+  // 300 = DTP Identified (Success)
+  // 301 = No DTP Identified (Success)
+  // 379 = Unable to Reach
+  // 380 = Patient Refused
+  resultCode      Int?
+
+  // AIM Model Fields (Cost Avoidance)
+  severityLevel   Int      @default(1) // 1-7 severity scale
+  aimDollarValue  Float    @default(0) // Projected cost avoidance
+
+  // Workflow Status
+  status          String   @default("Pending") // Pending, Approved, Review
+  adherenceBarrier String? // SDoH/behavioral barriers (JSON string)
+
+  // HEDIS IET Fields (SUD Treatment Tracking)
+  indexDate       DateTime? // SUD episode start date
+  initiationMet   Boolean  @default(false)
+  engagementMet   Boolean  @default(false)
+  ietWindowExpires DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+
+  @@index([clientId])
+  @@index([memberId])
+  @@index([serviceDate])
+  @@index([resultCode])
+  @@index([status])
 }
 
 model FactAdherence {
@@ -54,6 +114,7 @@ model FactAdherence {
   createdAt   DateTime @default(now())
 
   @@index([clientId])
+  @@index([memberId])
   @@index([asOfDate])
 }
 
@@ -64,13 +125,22 @@ model FactNotification {
   entityRef   String
   message     String
   recommendedAction String
-  severity    String
+  severity    String    // Critical, High, Medium, Low
   owner       String
   slaHours    Int
-  status      String
+  status      String    // Active, open, triaged, Resolved
   createdAt   DateTime  @default(now())
   acknowledgedAt DateTime?
   resolvedAt  DateTime?
 
   @@index([status])
+  @@index([severity])
+}
+
+// Reference: Core Chronic Diseases for 2025 CMS MTM
+model ChronicDisease {
+  id          String @id @default(cuid())
+  code        String @unique
+  name        String
+  category    String // CORE_10 for 2025 CMS mandatory conditions
 }
