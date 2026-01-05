@@ -309,10 +309,19 @@ export async function getNotifications() {
   try {
     if (!(await canConnectToDb())) throw new Error('No DB')
 
-    return await prisma.factNotification.findMany({
+    const notifications = await prisma.factNotification.findMany({
       orderBy: { createdAt: 'desc' },
       take: 20
     })
+
+    // Normalize dates to ISO strings for RSC compatibility
+    return notifications.map(n => ({
+      ...n,
+      clientId: n.clientId || '',
+      createdAt: n.createdAt.toISOString(),
+      acknowledgedAt: n.acknowledgedAt?.toISOString() || null,
+      resolvedAt: n.resolvedAt?.toISOString() || null
+    }))
   } catch {
     return mockNotifications
   }

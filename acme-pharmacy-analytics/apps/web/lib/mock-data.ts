@@ -69,7 +69,7 @@ export const mockNotifications = [
     status: 'Active',
     message: 'CMR completion rate dropped below 80% threshold',
     recommendedAction: 'Prioritize high-risk member outreach in work queue',
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     acknowledgedAt: null,
     resolvedAt: null
   },
@@ -84,7 +84,7 @@ export const mockNotifications = [
     status: 'Active',
     message: '47 members have PDC below 75% in diabetes medications',
     recommendedAction: 'Deploy refill reminder campaign for at-risk cohort',
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     acknowledgedAt: null,
     resolvedAt: null
   },
@@ -99,9 +99,9 @@ export const mockNotifications = [
     status: 'Resolved',
     message: 'New CMS rules will add 312 members to MTM eligibility',
     recommendedAction: 'Review staffing capacity for Q1 2025',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    acknowledgedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    resolvedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    acknowledgedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    resolvedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
   }
 ]
 
