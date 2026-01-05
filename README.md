@@ -1,32 +1,26 @@
-# ACME Pharmacy Analytics - Complete Demo Kit
+# ACME Pharmacy Analytics - Enterprise MTM Platform
 
-**Status:** ✅ MVP Complete and Deployed
+**Status:** ✅ MVP Complete with Enterprise Features
 **GitHub:** https://github.com/aks129/bi-demo
-**Vercel:** https://web-id8sz90ls-aks129s-projects.vercel.app
+**Demo Password:** `GeneDemo`
 
 ---
 
 ## What This Is
 
-A complete **Sigma-class analytics demo** for pharmacy products, built from specifications to deployed application in ~60 minutes. This repository contains:
+A complete **enterprise-grade analytics platform** for Medication Therapy Management (MTM), featuring:
 
-1. **Complete Specification Kit** (150+ pages)
-2. **Working Next.js MVP Application**
-3. **Deployment Documentation**
-
-This demonstrates the full lifecycle: requirements → architecture → implementation → deployment.
+- **11 Dashboard Pages** - Executive, MTM, Adherence, ROI, Eligibility, and more
+- **6 Enterprise Platform Features** - Community, Wiki, Case Studies, Benchmarking, Report Builder, Activity Feed
+- **AI-Powered Chat Assistant** - Claude-powered analytics assistant
+- **Password-Protected Access** - Secure demo environment
+- **Full Specification Kit** - 150+ pages of documentation
 
 ---
 
 ## Quick Start
 
-### View the Live Demo
-
-**Vercel Deployment:** https://web-id8sz90ls-aks129s-projects.vercel.app
-
-**Note:** The live deployment currently uses SQLite (local development mode). For full functionality with persistent data, see [DEPLOYMENT.md](DEPLOYMENT.md) for cloud database setup.
-
-### Run Locally (Recommended)
+### Run Locally
 
 ```bash
 # Clone repository
@@ -38,17 +32,70 @@ npm install
 
 # Set up database
 npm run db:push    # Create SQLite database
-npm run db:seed    # Seed with 100 members + data
+npm run db:seed    # Seed with demo data
 
 # Start development server
 npm run dev
 # Open http://localhost:3000
 ```
 
-**Demo Credentials:**
-- analyst@acme.com / demo123
-- exec@acme.com / demo123
-- admin@acme.com / demo123
+**Demo Password:** `GeneDemo`
+
+---
+
+## Features Overview
+
+### Core Analytics Dashboards
+
+| Dashboard | Description | Key Metrics |
+|-----------|-------------|-------------|
+| **Executive Overview** | High-level KPIs with trends | Completion rate, ROI, Star Rating |
+| **Client Analytics** | Adherence by drug class | PDC, at-risk members, alerts |
+| **Adherence Deep Dive** | Cohort analysis | Distribution, trends, benchmarks |
+| **Member Analytics** | Individual member tracking | Searchable directory, history |
+| **MTM Performance** | CMR/TIP completion rates | Attempt rate, refusal rate |
+| **Financial ROI** | Cost avoidance analysis | AIM values, waterfall chart |
+| **2025 Eligibility** | CMS rule compliance | Threshold analysis, projections |
+| **Work Queue** | Pharmacist workflow | Priority sorting, interventions |
+| **Insights & Alerts** | Rules engine notifications | Playbooks, SLAs, owners |
+
+### Enterprise Platform Features
+
+| Feature | Description |
+|---------|-------------|
+| **Analytics Community** | Cross-client forum for MTM professionals |
+| **Wiki & Data Dictionary** | Central knowledge base with 6+ searchable terms |
+| **Case Studies** | Success stories with before/after metrics |
+| **Benchmarking** | National comparison with percentile rankings |
+| **Report Builder** | Drag-and-drop custom report creation |
+| **Activity Feed** | Real-time updates with 30-second polling |
+
+### Security & Authentication
+
+- Password-protected demo (`GeneDemo`)
+- Secure cookie-based authentication
+- 7-day session persistence
+- Logout functionality
+
+### AI Integration
+
+- Claude-powered chat assistant
+- Dashboard-aware responses
+- MTM metric explanations
+- Actionable insights
+
+---
+
+## Technology Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Charts:** Recharts
+- **Database:** Prisma ORM + SQLite
+- **AI:** Anthropic Claude API
+- **Icons:** Lucide React
+- **Deployment:** Vercel
 
 ---
 
@@ -56,256 +103,174 @@ npm run dev
 
 ```
 bi-demo/
+├── README.md                           # This file
+├── PRD.md                              # Product Requirements Document
+├── DEPLOYMENT.md                       # Deployment guide
 │
-├── README.md                         # This file
-├── DEPLOYMENT.md                     # Deployment guide and status
+├── acme-pharmacy-analytics-spec/       # 150+ page specification kit
+│   ├── vision.md                       # Problem statement & solution
+│   ├── scope.md                        # MVP vs v2.0 features
+│   ├── personas.md                     # 9 user roles
+│   └── ...                             # Data contracts, KPIs, etc.
 │
-├── acme-pharmacy-analytics-spec/     # Complete specification kit
-│   ├── README.md                     # Spec kit navigation
-│   ├── vision.md                     # Problem statement & solution
-│   ├── scope.md                      # MVP vs v2.0 features
-│   ├── glossary.md                   # 60+ healthcare terms
-│   ├── personas.md                   # 9 user roles
-│   ├── IMPLEMENTATION_BLUEPRINT.md   # 42-58 hour build guide
-│   ├── data_contracts/               # Schema & API contracts
-│   ├── kpi_definitions/              # Metric formulas
-│   └── ... (15 total documents)
-│
-└── acme-pharmacy-analytics/          # Next.js application
-    ├── PROJECT_SUMMARY.md            # High-level overview
-    ├── QUICK_START.md                # Getting started guide
-    └── apps/web/                     # Main web application
-        ├── app/                      # Next.js 15 App Router
-        │   ├── page.tsx             # Landing page
-        │   └── dashboard/
-        │       └── page.tsx         # Client Analytics
-        ├── lib/                      # Utilities
-        ├── prisma/                   # Database schema & seed
-        ├── package.json
-        └── README.md                 # App-specific docs
+└── acme-pharmacy-analytics/
+    └── apps/web/                       # Main application
+        ├── app/
+        │   ├── page.tsx                # Landing page
+        │   ├── login/                  # Password protection
+        │   ├── dashboard/              # 11 dashboard pages
+        │   │   ├── executive/          # Executive Overview
+        │   │   ├── adherence/          # Adherence Deep Dive
+        │   │   ├── members/            # Member Analytics
+        │   │   ├── mtm/                # MTM Performance
+        │   │   ├── roi/                # Financial ROI
+        │   │   ├── eligibility/        # 2025 Eligibility
+        │   │   ├── work-queue/         # Pharmacist Work Queue
+        │   │   ├── insights/           # Insights & Alerts
+        │   │   ├── community/          # Analytics Community
+        │   │   ├── wiki/               # Wiki pages
+        │   │   ├── data-dictionary/    # Searchable glossary
+        │   │   ├── case-studies/       # Success stories
+        │   │   ├── benchmarking/       # National comparison
+        │   │   ├── report-builder/     # Custom reports
+        │   │   ├── reports/            # Saved reports
+        │   │   ├── feed/               # Activity feed
+        │   │   └── embedded/           # Sigma/Hex embedding
+        │   └── api/
+        │       ├── auth/               # Login/logout
+        │       ├── chat/               # Claude AI chat
+        │       └── sigma/              # Sigma embed API
+        ├── components/
+        │   └── dashboard/              # Reusable components
+        ├── lib/
+        │   ├── data-service.ts         # Database queries
+        │   ├── platform-mock-data.ts   # Mock data for platform features
+        │   └── platform-service.ts     # Platform data services
+        ├── middleware.ts               # Route protection
+        └── prisma/
+            ├── schema.prisma           # Database schema
+            └── seed.ts                 # Seed data
 ```
 
 ---
 
-## What's Included
+## Key Metrics
 
-### Specification Kit (150+ Pages)
+### MTM Performance
+- **Completion Rate:** CMRs completed / eligible members
+- **Attempt Rate:** CMRs attempted / eligible members
+- **Refusal Rate:** Members who declined / attempted
 
-**Location:** [acme-pharmacy-analytics-spec/](acme-pharmacy-analytics-spec/)
+### Adherence (PDC)
+- **PDC 90:** Proportion of days covered (90-day window)
+- **At-Risk:** Members with PDC 75-79%
+- **Critical:** Members with PDC < 75%
 
-Complete requirements documentation:
-- Vision & problem statement
-- Scope definition (MVP vs future)
-- 9 user personas with roles
-- 7-pillar architecture
-- Data contracts (15 tables)
-- KPI definitions (35+ metrics)
-- Success criteria & risks
-- Implementation blueprint (42-58 hours)
-- Demo script & talk track
-- Glossary of 60+ healthcare terms
+### Financial
+- **AIM Value:** Actuarial Impact Model cost avoidance
+- **ROI Multiple:** Total savings / program cost
+- **Cost Avoidance:** Estimated healthcare savings
 
-### Working MVP Application
-
-**Location:** [acme-pharmacy-analytics/apps/web/](acme-pharmacy-analytics/apps/web/)
-
-Features implemented:
-- ✅ Landing page with 7 pillars overview
-- ✅ Client Analytics dashboard with real data
-- ✅ Adherence KPIs for 3 drug classes (Diabetes, Hypertension, Statins)
-- ✅ Impact-first messaging ("So what? Now what?")
-- ✅ Active insights & alerts from rules engine
-- ✅ 100% synthetic data (demo-safe)
-- ✅ SQLite database with Prisma ORM
-- ✅ Tailwind CSS styling
-- ✅ TypeScript for type safety
-
-### Technology Stack
-
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Database:** Prisma ORM with SQLite (local) / Cloud DB (production)
-- **Deployment:** Vercel
-- **Version Control:** GitHub
+### Star Ratings
+- **Threshold:** ≥80% PDC for 4+ stars
+- **Impact:** Affects CMS bonus payments worth millions
 
 ---
 
-## Key Features
+## Demo Walkthrough
 
-### Impact-First Design
+### 1. Login (Password: `GeneDemo`)
+Access the protected demo environment
 
-Every metric answers two questions:
-- **So what?** Why does this metric matter?
-- **Now what?** What action should I take?
+### 2. Executive Overview
+See high-level KPIs, trends, and Star Rating status
 
-Example from the dashboard:
+### 3. MTM Performance
+Review completion rates, work queue priorities
+
+### 4. Report Builder
+Create custom reports with drag-and-drop metrics:
+- Select from 15+ metrics
+- Choose visualization (bar, line, area, table, KPI)
+- Configure filters and grouping
+- Save and share reports
+
+### 5. Analytics Community
+Browse best practices, Q&A, announcements
+
+### 6. Benchmarking
+Compare performance against national averages:
+- Percentile rankings
+- Top decile vs bottom decile
+- Trend analysis
+
+---
+
+## Environment Variables
+
+```env
+# Required
+DATABASE_URL="file:./prisma/dev.db"
+
+# Optional - AI Chat
+ANTHROPIC_API_KEY="your-key"
+
+# Optional - Sigma Integration
+SIGMA_CLIENT_ID="your-client-id"
+SIGMA_CLIENT_SECRET="your-secret"
+
+# Optional - Custom password (default: GeneDemo)
+DEMO_PASSWORD="your-custom-password"
 ```
-Diabetes Adherence: 76.4%
-⚠ Below Star Ratings threshold
 
-So what? Risk to 4+ star rating
-Now what? Identify at-risk members → send refill reminders
+---
+
+## Development
+
+### Install Dependencies
+```bash
+npm install
 ```
 
-### 7 Pillars Architecture
+### Database Setup
+```bash
+npm run db:push    # Create tables
+npm run db:seed    # Seed demo data
+```
 
-1. **Client-Facing Analytics** - Adherence KPIs, Star Ratings impact (✅ Implemented)
-2. **Exec Monitoring** - Performance metrics, growth trends (Planned)
-3. **Internal Ops** - System health, latency monitoring (Planned)
-4. **Product Metrics** - Usage funnels, engagement (Planned)
-5. **Insights & Notifications** - Rules engine with playbooks (Planned)
-6. **Impact-First Framing** - "So what? Now what?" messaging (✅ Implemented)
-7. **AI Chat Agent** - Natural language queries (Planned)
+### Development Server
+```bash
+npm run dev
+```
 
-### Data Model
-
-5 tables with 100+ records:
-- **User** - Demo users with roles
-- **DimClient** - ACME Pharmacy
-- **DimMember** - 100 synthetic members
-- **FactAdherence** - 300 adherence records (PDC, MPR)
-- **FactNotification** - 3 sample alerts
+### Production Build
+```bash
+npm run build
+npm start
+```
 
 ---
 
-## Documentation
+## Deployment
 
-### Getting Started
-- **Quick Start:** [QUICK_START.md](acme-pharmacy-analytics/QUICK_START.md)
-- **Deployment Guide:** [DEPLOYMENT.md](DEPLOYMENT.md)
-- **App README:** [apps/web/README.md](acme-pharmacy-analytics/apps/web/README.md)
+### Vercel (Recommended)
 
-### Specifications
-- **Spec Kit Overview:** [acme-pharmacy-analytics-spec/README.md](acme-pharmacy-analytics-spec/README.md)
-- **Vision & Strategy:** [vision.md](acme-pharmacy-analytics-spec/vision.md)
-- **Scope & Features:** [scope.md](acme-pharmacy-analytics-spec/scope.md)
-- **Implementation Guide:** [IMPLEMENTATION_BLUEPRINT.md](acme-pharmacy-analytics-spec/IMPLEMENTATION_BLUEPRINT.md)
-
-### Technical Details
-- **Project Summary:** [PROJECT_SUMMARY.md](acme-pharmacy-analytics/PROJECT_SUMMARY.md)
-- **MVP Build Guide:** [BUILD_MVP.md](acme-pharmacy-analytics/apps/web/BUILD_MVP.md)
-
----
-
-## Deployment Status
-
-**GitHub Repository:** ✅ Live at https://github.com/aks129/bi-demo
-
-**Vercel Deployment:** ✅ Deployed at https://web-id8sz90ls-aks129s-projects.vercel.app
-
-**Database:** ⏳ SQLite (local dev mode) - needs cloud database for production
-
-**Next Steps for Production:**
-1. Set up cloud database (Turso/Neon/PlanetScale)
-2. Update DATABASE_URL in Vercel environment variables
-3. Run database migrations
-4. Seed production database
-5. Redeploy
+1. Connect GitHub repository to Vercel
+2. Set environment variables:
+   - `DATABASE_URL` (for production DB)
+   - `ANTHROPIC_API_KEY` (optional, for AI chat)
+   - `DEMO_PASSWORD` (optional, default: GeneDemo)
+3. Deploy
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
 ---
 
-## Demo Flow
+## Documentation
 
-### Local Demo (5 minutes)
-
-1. Clone and install:
-   ```bash
-   git clone https://github.com/aks129/bi-demo.git
-   cd bi-demo/acme-pharmacy-analytics/apps/web
-   npm install
-   ```
-
-2. Set up database:
-   ```bash
-   npm run db:push
-   npm run db:seed
-   ```
-
-3. Start app:
-   ```bash
-   npm run dev
-   ```
-
-4. View dashboard:
-   - Open http://localhost:3000
-   - Click "View Dashboard"
-   - See adherence KPIs for 3 drug classes
-   - Review active notifications
-   - Note impact-first messaging
-
-### Talk Track
-
-**Setup (30 seconds):**
-"This is ACME Pharmacy Analytics, a Sigma-class demo for pharmacy products. It shows what we can build: complete specs, working app, deployed in under an hour."
-
-**Landing Page (30 seconds):**
-"Here are our 7 pillars: client analytics, exec monitoring, internal ops, product metrics, insights, impact-first framing, and AI chat. This MVP focuses on client analytics."
-
-**Dashboard (2 minutes):**
-"The Client Analytics dashboard shows medication adherence for three drug classes. Notice that Diabetes is at 76.4% - below the 80% Star Ratings threshold. The impact-first messaging tells us why this matters (risk to 4+ star rating) and what to do (send refill reminders).
-
-Below, we see active notifications from the rules engine. Each has a severity, owner, and SLA. Click 'View Playbook' to see the step-by-step action plan.
-
-This is 100% synthetic data - completely demo-safe, no PHI or PII."
-
-**Technical Overview (1 minute):**
-"Built with Next.js 15, TypeScript, Prisma ORM, and Tailwind CSS. The database has 5 tables with 100 members and 300 adherence records. It's deployed to Vercel with one-click deployment.
-
-The full spec kit has 150+ pages including data contracts, KPI definitions, personas, and a 42-58 hour implementation blueprint for building the complete 7-pillar platform."
-
----
-
-## Performance
-
-- **Page Load:** <2s (local)
-- **Database Queries:** <50ms
-- **Build Time:** ~30s
-- **Bundle Size:** <500KB
-
----
-
-## Key Metrics Implemented
-
-### PDC_90 (Proportion of Days Covered)
-- **Formula:** (Days with medication available) / 90 × 100
-- **Threshold:** ≥80% for Star Ratings compliance
-- **Status:** Automatically calculated from database
-
-### Impact Messaging
-- **Below 80%:** Risk to Star Ratings → Identify at-risk members
-- **75-80%:** At Risk → Monitor closely, proactive outreach
-- **Above 80%:** Healthy → Continue monitoring
-
----
-
-## Extensibility
-
-This MVP provides the foundation for:
-
-1. **Additional Dashboards:**
-   - Executive Overview
-   - Internal Operations
-   - Product Metrics
-   - Insights & Alerts (dedicated page)
-   - Admin/Governance
-   - AI Chat Agent
-
-2. **Enhanced Features:**
-   - Interactive charts (Recharts library already installed)
-   - Authentication with 6 roles (NextAuth configured)
-   - API routes for data access
-   - Rules engine with playbooks
-   - Row-level security
-   - Real-time notifications
-
-3. **Data Expansion:**
-   - Scale to 5,000+ members
-   - Add 1.2M claims
-   - 10 additional drug classes
-   - Historical trend data
+- **PRD:** [PRD.md](PRD.md) - Full product requirements
+- **Specs:** [acme-pharmacy-analytics-spec/](acme-pharmacy-analytics-spec/) - 150+ pages
+- **Deployment:** [DEPLOYMENT.md](DEPLOYMENT.md) - Setup guide
 
 ---
 
@@ -315,25 +280,12 @@ MIT
 
 ---
 
-## Support
-
-For questions or issues:
-1. Check [DEPLOYMENT.md](DEPLOYMENT.md) for deployment help
-2. Review [IMPLEMENTATION_BLUEPRINT.md](acme-pharmacy-analytics-spec/IMPLEMENTATION_BLUEPRINT.md) for technical details
-3. See [PROJECT_SUMMARY.md](acme-pharmacy-analytics/PROJECT_SUMMARY.md) for overview
-4. Open an issue on GitHub
-
----
-
 ## Acknowledgments
 
 **Built by:** Outcomes Product & Engineering
-**Based on:** ACME Pharmacy Analytics Spec Kit
-**Purpose:** Sigma-class analytics demo for pharmacy products
-**Time to Build:** ~60 minutes from spec to deployment
+**Purpose:** Enterprise MTM Analytics Platform Demo
+**Stack:** Next.js 15, TypeScript, Tailwind CSS, Prisma, Claude AI
 
 ---
 
-**Status:** ✅ MVP Complete | ⏳ Production Database Setup Pending
-
-**Last Updated:** 2025-10-19
+**Last Updated:** January 2026

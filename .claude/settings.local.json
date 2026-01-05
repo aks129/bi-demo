@@ -50,7 +50,8 @@
       "Bash(npx vercel:*)",
       "Bash(npx prisma db seed:*)",
       "Bash(curl:*)",
-      "Bash(timeout 30 npm run dev:*)"
+      "Bash(timeout 30 npm run dev:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
