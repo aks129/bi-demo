@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '@/lib/prisma'
+import { getContracts, getMTMData, getMonthlyTrend } from '@/lib/data-service'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { KPICard } from '@/components/dashboard/KPICard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
@@ -21,87 +21,6 @@ import {
   calculateStarRatingsStatus,
   RESULT_CODES
 } from '@/lib/engines/metricsEngine'
-
-async function getContracts() {
-  const contracts = await prisma.dimClient.findMany({
-    select: {
-      id: true,
-      name: true,
-      cmsContractNumber: true
-    },
-    orderBy: { name: 'asc' }
-  })
-  return contracts.map(c => ({
-    id: c.id,
-    name: c.name,
-    contractNumber: c.cmsContractNumber || 'N/A'
-  }))
-}
-
-async function getMTMData(contractId?: string) {
-  const whereClause = contractId ? { clientId: contractId } : {}
-
-  const claims = await prisma.claim.findMany({
-    where: whereClause,
-    orderBy: { serviceDate: 'desc' }
-  })
-
-  const eligibleMembers = await prisma.dimMember.count({
-    where: { mtmEligible: true, ...(contractId ? { clientId: contractId } : {}) }
-  })
-
-  const transformedClaims = claims.map(c => ({
-    id: c.id,
-    claimId: c.claimId,
-    memberId: c.memberId,
-    serviceDate: c.serviceDate,
-    opportunityType: c.opportunityType,
-    resultCode: c.resultCode,
-    status: c.status,
-    severityLevel: c.severityLevel,
-    aimDollarValue: c.aimDollarValue
-  }))
-
-  return { claims: transformedClaims, eligibleMembers }
-}
-
-async function getMonthlyTrend(contractId?: string) {
-  const whereClause = contractId ? { clientId: contractId } : {}
-
-  const claims = await prisma.claim.findMany({
-    where: {
-      ...whereClause,
-      serviceDate: {
-        gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
-      }
-    },
-    orderBy: { serviceDate: 'asc' }
-  })
-
-  const monthlyData = new Map<string, { total: number; completed: number; attempted: number }>()
-
-  claims.forEach(claim => {
-    const month = claim.serviceDate.toLocaleDateString('en-US', { month: 'short' })
-    if (!monthlyData.has(month)) {
-      monthlyData.set(month, { total: 0, completed: 0, attempted: 0 })
-    }
-    const data = monthlyData.get(month)!
-    data.total++
-
-    if (claim.resultCode === RESULT_CODES.SUCCESS_DTP || claim.resultCode === RESULT_CODES.SUCCESS_NO_DTP) {
-      data.completed++
-      data.attempted++
-    } else if (claim.resultCode === RESULT_CODES.REFUSED || claim.resultCode === RESULT_CODES.UNABLE_TO_REACH) {
-      data.attempted++
-    }
-  })
-
-  return Array.from(monthlyData.entries()).map(([month, data]) => ({
-    month,
-    completionRate: data.total > 0 ? (data.completed / data.total) * 100 : 0,
-    attemptRate: data.total > 0 ? (data.attempted / data.total) * 100 : 0
-  }))
-}
 
 interface PageProps {
   searchParams: Promise<{ contract?: string }>
