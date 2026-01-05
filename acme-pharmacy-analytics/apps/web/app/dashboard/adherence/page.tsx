@@ -1,80 +1,88 @@
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '@/lib/prisma'
+import { getAdherenceData } from '@/lib/data-service'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { KPICard } from '@/components/dashboard/KPICard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { BarChart } from '@/components/charts/BarChart'
 import { Activity, TrendingDown, TrendingUp, Users } from 'lucide-react'
 
-async function getAdherenceDetails() {
-  // Get adherence stats by drug class
-  const adherenceByClass = await prisma.factAdherence.groupBy({
-    by: ['drugClass'],
-    _avg: {
-      pdc90: true,
-      pdc180: true,
-      mpr90: true,
-    },
-    _count: true,
-  })
-
-  // Get member-level adherence distribution (bucketed)
-  const allAdherence = await prisma.factAdherence.findMany({
-    select: {
-      pdc90: true,
-      drugClass: true,
-      memberId: true,
-    }
-  })
-
-  // Create distribution buckets
-  const buckets = {
-    '90-100%': 0,
-    '80-89%': 0,
-    '70-79%': 0,
-    '60-69%': 0,
-    '<60%': 0,
-  }
-
-  allAdherence.forEach(record => {
-    if (record.pdc90 >= 90) buckets['90-100%']++
-    else if (record.pdc90 >= 80) buckets['80-89%']++
-    else if (record.pdc90 >= 70) buckets['70-79%']++
-    else if (record.pdc90 >= 60) buckets['60-69%']++
-    else buckets['<60%']++
-  })
-
-  const distribution = Object.entries(buckets).map(([range, count]) => ({
-    range,
-    count,
-  }))
-
-  // Count members by adherence status
-  const healthyCount = allAdherence.filter(r => r.pdc90 >= 80).length
-  const atRiskCount = allAdherence.filter(r => r.pdc90 >= 75 && r.pdc90 < 80).length
-  const criticalCount = allAdherence.filter(r => r.pdc90 < 75).length
-
-  return {
-    byDrugClass: adherenceByClass.map(item => ({
-      drugClass: item.drugClass,
-      pdc90: item._avg.pdc90 || 0,
-      pdc180: item._avg.pdc180 || 0,
-      mpr90: item._avg.mpr90 || 0,
-      count: item._count,
-    })),
-    distribution,
-    healthyCount,
-    atRiskCount,
-    criticalCount,
-    totalRecords: allAdherence.length,
-  }
+interface AdherenceDetails {
+  byDrugClass: Array<{
+    drugClass: string
+    pdc90: number
+    pdc180: number
+    mpr90: number
+    count: number
+  }>
+  distribution: Array<{ range: string; count: number }>
+  healthyCount: number
+  atRiskCount: number
+  criticalCount: number
+  totalRecords: number
 }
 
 export default async function AdherenceDeepDivePage() {
-  const data = await getAdherenceDetails()
+  let data: AdherenceDetails = {
+    byDrugClass: [],
+    distribution: [],
+    healthyCount: 0,
+    atRiskCount: 0,
+    criticalCount: 0,
+    totalRecords: 0
+  }
 
-  const overallAdherence = data.byDrugClass.reduce((sum, item) => sum + item.pdc90, 0) / data.byDrugClass.length
+  try {
+    const { adherenceByClass, allAdherence } = await getAdherenceData()
+
+    // Create distribution buckets
+    const buckets = {
+      '90-100%': 0,
+      '80-89%': 0,
+      '70-79%': 0,
+      '60-69%': 0,
+      '<60%': 0,
+    }
+
+    allAdherence.forEach(record => {
+      if (record.pdc90 >= 90) buckets['90-100%']++
+      else if (record.pdc90 >= 80) buckets['80-89%']++
+      else if (record.pdc90 >= 70) buckets['70-79%']++
+      else if (record.pdc90 >= 60) buckets['60-69%']++
+      else buckets['<60%']++
+    })
+
+    const distribution = Object.entries(buckets).map(([range, count]) => ({
+      range,
+      count,
+    }))
+
+    // Count members by adherence status
+    const healthyCount = allAdherence.filter(r => r.pdc90 >= 80).length
+    const atRiskCount = allAdherence.filter(r => r.pdc90 >= 75 && r.pdc90 < 80).length
+    const criticalCount = allAdherence.filter(r => r.pdc90 < 75).length
+
+    data = {
+      byDrugClass: adherenceByClass.map(item => ({
+        drugClass: item.drugClass,
+        pdc90: item._avg.pdc90 || 0,
+        pdc180: item._avg.pdc180 || 0,
+        mpr90: item._avg.mpr90 || 0,
+        count: item._count,
+      })),
+      distribution,
+      healthyCount,
+      atRiskCount,
+      criticalCount,
+      totalRecords: allAdherence.length,
+    }
+  } catch (error) {
+    console.error('Error fetching adherence data:', error)
+  }
+
+  const overallAdherence = data.byDrugClass.length > 0
+    ? data.byDrugClass.reduce((sum, item) => sum + item.pdc90, 0) / data.byDrugClass.length
+    : 0
 
   return (
     <DashboardLayout

@@ -1,58 +1,54 @@
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '@/lib/prisma'
+import { getMembers } from '@/lib/data-service'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
-import { User, Activity, Calendar, MapPin } from 'lucide-react'
+import { User, Activity, MapPin } from 'lucide-react'
 
-async function getMemberDetails() {
-  const members = await prisma.dimMember.findMany({
-    take: 50,
-    orderBy: {
-      name: 'asc'
-    }
-  })
-
-  // Get adherence records for these members
-  const memberIds = members.map(m => m.id)
-  const adherenceRecords = await prisma.factAdherence.findMany({
-    where: {
-      memberId: { in: memberIds }
-    }
-  })
-
-  // Create member-adherence map
-  const memberAdherence = new Map()
-  adherenceRecords.forEach(record => {
-    if (!memberAdherence.has(record.memberId)) {
-      memberAdherence.set(record.memberId, [])
-    }
-    memberAdherence.get(record.memberId).push(record)
-  })
-
-  // Combine data
-  const memberData = members.map(member => {
-    const records = memberAdherence.get(member.id) || []
-    const avgPDC = records.length > 0
-      ? records.reduce((sum: number, r: any) => sum + r.pdc90, 0) / records.length
-      : 0
-
-    const status = avgPDC >= 80 ? 'healthy' : avgPDC >= 75 ? 'warning' : 'critical'
-
-    return {
-      ...member,
-      avgPDC,
-      recordCount: records.length,
-      status,
-      drugClasses: records.map((r: any) => r.drugClass).join(', '),
-    }
-  })
-
-  return memberData
+interface MemberData {
+  id: string
+  memberId: string | null
+  name: string | null
+  age: number | null
+  gender: string | null
+  zipCode: string | null
+  avgPDC: number
+  recordCount: number
+  status: 'healthy' | 'warning' | 'critical'
+  drugClasses: string
 }
 
 export default async function MemberAnalyticsPage() {
-  const members = await getMemberDetails()
+  let members: MemberData[] = []
+
+  try {
+    const membersData = await getMembers(50)
+
+    members = membersData.map(member => {
+      const records = member.adherence || []
+      const avgPDC = records.length > 0
+        ? records.reduce((sum: number, r: { pdc90: number }) => sum + r.pdc90, 0) / records.length
+        : 0
+
+      const status: 'healthy' | 'warning' | 'critical' =
+        avgPDC >= 80 ? 'healthy' : avgPDC >= 75 ? 'warning' : 'critical'
+
+      return {
+        id: member.id,
+        memberId: member.memberId || null,
+        name: member.name || null,
+        age: member.age || null,
+        gender: ('gender' in member ? (member as { gender?: string }).gender : null) || null,
+        zipCode: member.zipCode || null,
+        avgPDC,
+        recordCount: records.length,
+        status,
+        drugClasses: records.map((r: { drugClass: string }) => r.drugClass).join(', '),
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching member data:', error)
+  }
 
   const statusCounts = {
     healthy: members.filter(m => m.status === 'healthy').length,
@@ -169,21 +165,21 @@ export default async function MemberAnalyticsPage() {
                           <User className="h-5 w-5 text-blue-600" />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{member.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{member.name || 'Unknown'}</div>
                           <div className="text-xs text-gray-500">ID: {member.id.substring(0, 8)}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {member.age}
+                      {member.age || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {member.gender}
+                      {member.gender || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 text-gray-400 mr-1" />
-                        {member.zipCode}
+                        {member.zipCode || 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
@@ -199,8 +195,8 @@ export default async function MemberAnalyticsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {member.avgPDC > 0 && (
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[member.status as keyof typeof statusColors]}`}>
-                          {statusLabels[member.status as keyof typeof statusLabels]}
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[member.status]}`}>
+                          {statusLabels[member.status]}
                         </span>
                       )}
                     </td>
