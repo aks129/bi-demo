@@ -1,37 +1,44 @@
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '@/lib/prisma'
+import { getNotifications } from '@/lib/data-service'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { KPICard } from '@/components/dashboard/KPICard'
 import { Bell, AlertTriangle, Info, CheckCircle, Clock } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
-async function getInsightsAndAlerts() {
-  const notifications = await prisma.factNotification.findMany({
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
-
-  const activeCount = notifications.filter(n => n.status === 'Active').length
-  const resolvedCount = notifications.filter(n => n.status === 'Resolved').length
-  const highSeverityCount = notifications.filter(n => n.severity === 'High' && n.status === 'Active').length
-
-  return {
-    notifications,
-    activeCount,
-    resolvedCount,
-    highSeverityCount,
-  }
+interface InsightsData {
+  notifications: Awaited<ReturnType<typeof getNotifications>>
+  activeCount: number
+  resolvedCount: number
+  highSeverityCount: number
 }
 
 export default async function InsightsAlertsPage() {
-  const data = await getInsightsAndAlerts()
+  let data: InsightsData = {
+    notifications: [],
+    activeCount: 0,
+    resolvedCount: 0,
+    highSeverityCount: 0
+  }
+
+  try {
+    const notifications = await getNotifications()
+
+    data = {
+      notifications,
+      activeCount: notifications.filter(n => n.status === 'Active').length,
+      resolvedCount: notifications.filter(n => n.status === 'Resolved').length,
+      highSeverityCount: notifications.filter(n => n.severity === 'High' && n.status === 'Active').length,
+    }
+  } catch (error) {
+    console.error('Error fetching insights data:', error)
+  }
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'High':
+      case 'Critical':
         return <AlertTriangle className="h-5 w-5" />
       case 'Medium':
         return <Info className="h-5 w-5" />
@@ -43,6 +50,7 @@ export default async function InsightsAlertsPage() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'High':
+      case 'Critical':
         return 'text-red-600 bg-red-50 border-red-200'
       case 'Medium':
         return 'text-yellow-600 bg-yellow-50 border-yellow-200'
@@ -124,7 +132,7 @@ export default async function InsightsAlertsPage() {
                         <div className="flex items-center gap-2 mb-2">
                           <h4 className="font-semibold text-lg">{notification.message}</h4>
                           <span className={`px-2 py-0.5 text-xs font-semibold rounded ${
-                            notification.severity === 'High' ? 'bg-red-600 text-white' :
+                            notification.severity === 'High' || notification.severity === 'Critical' ? 'bg-red-600 text-white' :
                             notification.severity === 'Medium' ? 'bg-yellow-600 text-white' :
                             'bg-blue-600 text-white'
                           }`}>
@@ -145,7 +153,7 @@ export default async function InsightsAlertsPage() {
                           </div>
                           <div>
                             <span className="text-gray-600 block">SLA</span>
-                            <span className="font-medium">24 hours</span>
+                            <span className="font-medium">{notification.slaHours || 24} hours</span>
                           </div>
                           <div>
                             <span className="text-gray-600 block">Status</span>
@@ -161,13 +169,13 @@ export default async function InsightsAlertsPage() {
                         </div>
 
                         <div className="flex gap-3">
-                          <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700">
+                          <button type="button" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700">
                             View Playbook
                           </button>
-                          <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded hover:bg-white">
+                          <button type="button" className="px-4 py-2 border border-gray-300 text-sm font-medium rounded hover:bg-white">
                             Assign Owner
                           </button>
-                          <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded hover:bg-white">
+                          <button type="button" className="px-4 py-2 border border-gray-300 text-sm font-medium rounded hover:bg-white">
                             Mark Resolved
                           </button>
                         </div>
@@ -213,7 +221,7 @@ export default async function InsightsAlertsPage() {
                           </p>
                         </div>
                       </div>
-                      <button className="text-sm text-blue-600 hover:text-blue-900">
+                      <button type="button" className="text-sm text-blue-600 hover:text-blue-900">
                         View Details
                       </button>
                     </div>
