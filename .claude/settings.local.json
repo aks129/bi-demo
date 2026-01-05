@@ -44,7 +44,10 @@
       "Bash(npm install:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: add Claude-powered analytics chatbot assistant\n\nNEW FEATURES:\n- ChatWidget component with floating chat interface\n- API endpoint \\(/api/chat\\) using Claude API via @anthropic-ai/sdk\n- Real-time platform data context injection\n- Dashboard-aware conversations\n\nCHATBOT CAPABILITIES:\n- Explains MTM metrics, Star Ratings thresholds, AIM ROI calculations\n- Answers questions about 2025 CMS eligibility changes\n- Provides actionable insights based on current dashboard data\n- Suggests interventions and priorities\n- Pre-configured suggested questions for quick access\n\nTECHNICAL IMPLEMENTATION:\n- Uses claude-sonnet-4-20250514 model\n- Environment variable: ANTHROPIC_API_KEY \\(for Vercel deployment\\)\n- Fetches current metrics from database for context\n- Accepts dashboard context from client\n- Responsive floating panel UI with message history\n\nUI FEATURES:\n- Floating chat bubble \\(bottom-right corner\\)\n- Suggested questions for first-time users\n- Message history with timestamps\n- Loading states and error handling\n- Clear chat functionality\n- Print-safe \\(hidden during export\\)\n\nENVIRONMENT VARIABLES FOR VERCEL:\n- ANTHROPIC_API_KEY: Your Claude API key\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npx vercel link)",
+      "Bash(npx vercel link:*)",
+      "Bash(npx vercel:*)"
     ],
     "deny": [],
     "ask": []
