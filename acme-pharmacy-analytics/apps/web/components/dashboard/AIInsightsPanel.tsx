@@ -30,7 +30,7 @@ interface AIInsight {
     label: string
     href?: string
   }
-  timestamp: Date
+  timestamp: string
 }
 
 interface AIInsightsPanelProps {
@@ -222,7 +222,7 @@ export function generateMTMInsights(data: {
         trend: 'down'
       },
       action: { label: 'View Work Queue' },
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     })
   }
 
@@ -241,7 +241,7 @@ export function generateMTMInsights(data: {
         trend: 'up'
       },
       action: { label: 'Analyze Refusals' },
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     })
   }
 
@@ -260,7 +260,7 @@ export function generateMTMInsights(data: {
         trend: 'up'
       },
       action: { label: 'Generate ROI Report' },
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     })
   }
 
@@ -277,7 +277,7 @@ export function generateMTMInsights(data: {
       value: data.eligibleMembers.toLocaleString()
     },
     action: { label: 'View 2025 Projections' },
-    timestamp: new Date()
+    timestamp: new Date().toISOString()
   })
 
   // Recommendation: High-value focus
@@ -290,7 +290,7 @@ export function generateMTMInsights(data: {
       summary: `${data.pendingCMRs} CMRs are pending - focus on members with diabetes + CHF combination.`,
       details: `Members with both diabetes and CHF have 3.2x higher intervention value and are more likely to accept outreach. Filter the work queue by these conditions and assign to your most experienced pharmacists for maximum impact.`,
       action: { label: 'Filter Work Queue' },
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     })
   }
 

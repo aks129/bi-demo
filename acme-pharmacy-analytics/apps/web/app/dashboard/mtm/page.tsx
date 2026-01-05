@@ -323,8 +323,8 @@ export default async function MTMPerformancePage({ searchParams }: PageProps) {
         </DashboardCard>
       </div>
 
-      {/* AI-Powered Insights - temporarily disabled for debugging */}
-      {/* <div className="mb-8">
+      {/* AI-Powered Insights */}
+      <div className="mb-8">
         <AIInsightsPanel
           insights={generateMTMInsights({
             completionRate: metrics.completionRate,
@@ -336,7 +336,7 @@ export default async function MTMPerformancePage({ searchParams }: PageProps) {
           })}
           title="AI-Powered MTM Insights"
         />
-      </div> */}
+      </div>
 
       {/* Impact-First Summary */}
       <DashboardCard title="MTM Performance Summary">
