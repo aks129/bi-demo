@@ -6,7 +6,8 @@ import { KPICard } from '@/components/dashboard/KPICard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { BarChart } from '@/components/charts/BarChart'
 import { LineChart } from '@/components/charts/LineChart'
-import { AIInsightsPanel, generateMTMInsights } from '@/components/dashboard/AIInsightsPanel'
+import { AIInsightsPanel } from '@/components/dashboard/AIInsightsPanel'
+import { generateMTMInsights } from '@/lib/insights-generator'
 import {
   CheckCircle,
   PhoneCall,
