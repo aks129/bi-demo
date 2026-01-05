@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
