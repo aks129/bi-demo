@@ -39,8 +39,25 @@ export function ChatWidget({ dashboardContext }: ChatWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(true)
+  const [showWelcome, setShowWelcome] = useState(true)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Hide welcome tooltip after 8 seconds or on first interaction
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWelcome(false)
+    }, 8000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Hide welcome when chat is opened
+  useEffect(() => {
+    if (isOpen || hasInteracted) {
+      setShowWelcome(false)
+    }
+  }, [isOpen, hasInteracted])
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -119,24 +136,77 @@ export function ChatWidget({ dashboardContext }: ChatWidgetProps) {
     setError(null)
   }
 
+  const handleOpenChat = () => {
+    setHasInteracted(true)
+    setIsOpen(!isOpen)
+  }
+
   return (
     <>
-      {/* Chat Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg transition-all duration-300 ${
-          isOpen
-            ? 'bg-gray-600 hover:bg-gray-700'
-            : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
-        }`}
-        aria-label={isOpen ? 'Close chat' : 'Open analytics assistant'}
-      >
-        {isOpen ? (
-          <X className="h-6 w-6 text-white" />
-        ) : (
-          <MessageCircle className="h-6 w-6 text-white" />
+      {/* Welcome Tooltip - shows briefly on load */}
+      {showWelcome && !isOpen && (
+        <div className="fixed bottom-24 right-6 z-50 animate-fade-in print:hidden">
+          <div className="bg-white rounded-lg shadow-xl border border-purple-200 p-4 max-w-xs">
+            <div className="flex items-start gap-3">
+              <div className="bg-purple-100 p-2 rounded-full">
+                <Sparkles className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">AI Analytics Assistant</p>
+                <p className="text-gray-600 text-xs mt-1">
+                  Ask me questions about your MTM metrics, Star Ratings, or get insights from your data.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowWelcome(false)}
+                className="text-gray-400 hover:text-gray-600 -mt-1 -mr-1"
+                aria-label="Dismiss welcome message"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            {/* Arrow pointing to button */}
+            <div className="absolute -bottom-2 right-10 w-4 h-4 bg-white border-r border-b border-purple-200 transform rotate-45"></div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Toggle Button - Enhanced with label and animation */}
+      <div className="fixed bottom-6 right-6 z-50 print:hidden">
+        {/* Label badge - always visible when closed */}
+        {!isOpen && (
+          <div className="absolute -top-2 -left-2 bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md animate-bounce-subtle">
+            AI
+          </div>
         )}
-      </button>
+
+        <button
+          type="button"
+          onClick={handleOpenChat}
+          className={`relative p-4 rounded-full shadow-lg transition-all duration-300 ${
+            isOpen
+              ? 'bg-gray-600 hover:bg-gray-700'
+              : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 hover:scale-110'
+          } ${!isOpen && !hasInteracted ? 'animate-pulse-ring' : ''}`}
+          aria-label={isOpen ? 'Close chat' : 'Open AI analytics assistant'}
+        >
+          {isOpen ? (
+            <X className="h-6 w-6 text-white" />
+          ) : (
+            <div className="flex items-center gap-2">
+              <Bot className="h-6 w-6 text-white" />
+            </div>
+          )}
+        </button>
+
+        {/* Hover label */}
+        {!isOpen && (
+          <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity hidden md:block">
+            Ask AI Assistant
+          </div>
+        )}
+      </div>
 
       {/* Chat Panel */}
       {isOpen && (
