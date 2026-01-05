@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd acme-pharmacy-analytics/apps/web && npm install --legacy-peer-deps && npx prisma generate && npm run build",
+  "outputDirectory": "acme-pharmacy-analytics/apps/web/.next",
+  "installCommand": "cd acme-pharmacy-analytics/apps/web && npm install --legacy-peer-deps",
+  "framework": "nextjs",
+  "env": {
+    "DATABASE_URL": "file:./prisma/dev.db"
+  }
+}
