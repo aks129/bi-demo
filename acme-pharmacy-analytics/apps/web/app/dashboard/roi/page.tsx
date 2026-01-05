@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '@/lib/prisma'
+import { getContracts, getROIData, getMonthlyROI } from '@/lib/data-service'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { KPICard } from '@/components/dashboard/KPICard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
@@ -21,77 +21,6 @@ import {
   formatCurrency,
   calculateSeverityDistribution
 } from '@/lib/engines/aimEngine'
-
-async function getContracts() {
-  const contracts = await prisma.dimClient.findMany({
-    select: {
-      id: true,
-      name: true,
-      cmsContractNumber: true
-    },
-    orderBy: { name: 'asc' }
-  })
-  return contracts.map(c => ({
-    id: c.id,
-    name: c.name,
-    contractNumber: c.cmsContractNumber || 'N/A'
-  }))
-}
-
-async function getROIData(contractId?: string) {
-  const whereClause = contractId ? { clientId: contractId } : {}
-
-  const claims = await prisma.claim.findMany({
-    where: whereClause,
-    orderBy: { serviceDate: 'desc' }
-  })
-
-  const aimClaims = claims.map(c => ({
-    id: c.id,
-    memberId: c.memberId,
-    serviceDate: c.serviceDate,
-    severityLevel: c.severityLevel,
-    aimDollarValue: c.aimDollarValue,
-    status: c.status,
-    opportunityType: c.opportunityType
-  }))
-
-  return aimClaims
-}
-
-async function getMonthlyROI(contractId?: string) {
-  const whereClause = contractId ? { clientId: contractId } : {}
-
-  const claims = await prisma.claim.findMany({
-    where: {
-      ...whereClause,
-      status: 'Approved',
-      serviceDate: {
-        gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
-      }
-    },
-    orderBy: { serviceDate: 'asc' }
-  })
-
-  const monthlyData = new Map<string, number>()
-  let cumulative = 0
-
-  claims.forEach(claim => {
-    const month = claim.serviceDate.toLocaleDateString('en-US', { month: 'short' })
-    if (!monthlyData.has(month)) {
-      monthlyData.set(month, 0)
-    }
-    monthlyData.set(month, monthlyData.get(month)! + claim.aimDollarValue)
-  })
-
-  const result: Array<{ month: string; savings: number; cumulative: number }> = []
-  monthlyData.forEach((savings, month) => {
-    cumulative += savings
-    result.push({ month, savings, cumulative })
-  })
-
-  return result
-}
 
 interface PageProps {
   searchParams: Promise<{ contract?: string }>
