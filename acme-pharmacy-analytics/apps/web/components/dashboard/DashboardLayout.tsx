@@ -3,6 +3,7 @@
 import { Sidebar } from './Sidebar'
 import { ContractSelector } from './ContractSelector'
 import { ExportButton } from './ExportButton'
+import { ChatWidget } from './ChatWidget'
 
 interface Contract {
   id: string
@@ -18,6 +19,7 @@ interface DashboardLayoutProps {
   currentContractId?: string
   showContractSelector?: boolean
   showExport?: boolean
+  showChat?: boolean
 }
 
 export function DashboardLayout({
@@ -27,7 +29,8 @@ export function DashboardLayout({
   contracts = [],
   currentContractId,
   showContractSelector = false,
-  showExport = true
+  showExport = true,
+  showChat = true
 }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -64,6 +67,11 @@ export function DashboardLayout({
           {children}
         </main>
       </div>
+
+      {/* AI Chat Assistant */}
+      {showChat && (
+        <ChatWidget dashboardContext={title} />
+      )}
     </div>
   )
 }
