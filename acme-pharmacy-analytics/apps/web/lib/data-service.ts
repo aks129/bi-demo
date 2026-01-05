@@ -16,6 +16,12 @@ import {
 
 // Check if we can connect to the database
 async function canConnectToDb(): Promise<boolean> {
+  // If prisma is null (failed to initialize), return false
+  if (!prisma) {
+    console.warn('Prisma client not initialized, using mock data')
+    return false
+  }
+
   try {
     await prisma.$queryRaw`SELECT 1`
     return true
