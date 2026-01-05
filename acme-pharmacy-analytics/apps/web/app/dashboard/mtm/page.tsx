@@ -30,11 +30,24 @@ export default async function MTMPerformancePage({ searchParams }: PageProps) {
   const params = await searchParams
   const contractId = params.contract
 
-  const [contracts, { claims, eligibleMembers }, monthlyTrend] = await Promise.all([
-    getContracts(),
-    getMTMData(contractId),
-    getMonthlyTrend(contractId)
-  ])
+  let contracts: Awaited<ReturnType<typeof getContracts>> = []
+  let claims: Awaited<ReturnType<typeof getMTMData>>['claims'] = []
+  let eligibleMembers = 0
+  let monthlyTrend: Awaited<ReturnType<typeof getMonthlyTrend>> = []
+
+  try {
+    const [contractsData, mtmData, trendData] = await Promise.all([
+      getContracts(),
+      getMTMData(contractId),
+      getMonthlyTrend(contractId)
+    ])
+    contracts = contractsData
+    claims = mtmData.claims
+    eligibleMembers = mtmData.eligibleMembers
+    monthlyTrend = trendData
+  } catch (error) {
+    console.error('Error fetching MTM data:', error)
+  }
 
   // Calculate metrics using the engine
   const metrics = calculateContractMetrics(claims)

@@ -1,55 +1,39 @@
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '@/lib/prisma'
+import { getDashboardKPIs, getNotifications as getNotificationsFromService, getAdherenceData } from '@/lib/data-service'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { KPICard } from '@/components/dashboard/KPICard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { BarChart } from '@/components/charts/BarChart'
 import { TrendingUp, Users, Bell, Activity } from 'lucide-react'
 
-async function getAdherenceKPIs() {
-  const stats = await prisma.factAdherence.groupBy({
-    by: ['drugClass'],
-    _avg: {
-      pdc90: true,
-      pdc180: true,
-      mpr90: true,
-    },
-    _count: true,
-  })
-
-  return stats
-}
-
-async function getNotifications() {
-  const notifications = await prisma.factNotification.findMany({
-    where: {
-      status: {
-        in: ['Active', 'open', 'triaged']
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    },
-    take: 5
-  })
-
-  return notifications
-}
-
-async function getMemberCount() {
-  return await prisma.dimMember.count()
-}
-
 export default async function DashboardPage() {
-  const [kpis, notifications, memberCount] = await Promise.all([
-    getAdherenceKPIs(),
-    getNotifications(),
-    getMemberCount()
-  ])
+  let kpis: { drugClass: string; _avg: { pdc90: number | null; pdc180: number | null; mpr90: number | null }; _count: number }[] = []
+  let notifications: Awaited<ReturnType<typeof getNotificationsFromService>> = []
+  let memberCount = 0
+
+  try {
+    const [dashboardData, notificationsData, adherenceData] = await Promise.all([
+      getDashboardKPIs(),
+      getNotificationsFromService(),
+      getAdherenceData()
+    ])
+
+    kpis = dashboardData.adherenceByClass.map(stat => ({
+      drugClass: stat.drugClass,
+      _avg: { pdc90: stat._avg.pdc90 ?? null, pdc180: null, mpr90: null },
+      _count: stat._count
+    }))
+    notifications = notificationsData.filter(n => ['Active', 'open', 'triaged'].includes(n.status))
+    memberCount = dashboardData.totalMembers
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error)
+  }
 
   // Calculate overall adherence
-  const overallAdherence = kpis.reduce((sum, stat) => sum + (stat._avg.pdc90 || 0), 0) / kpis.length
+  const overallAdherence = kpis.length > 0
+    ? kpis.reduce((sum, stat) => sum + (stat._avg.pdc90 || 0), 0) / kpis.length
+    : 0
 
   return (
     <DashboardLayout
