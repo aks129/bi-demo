@@ -753,9 +753,12 @@ export default function QuotesPage() {
   const [selectedFeeling, setSelectedFeeling] = useState<Feeling | null>(null);
   const [visSeed, setVisSeed] = useState(1);
   const [showVis, setShowVis] = useState(false);
+  const [shuffled, setShuffled] = useState(quotes);
 
-  // Shuffle quotes once on mount
-  const shuffled = useMemo(() => shuffleQuotes(quotes), []);
+  // Shuffle quotes after mount to avoid hydration mismatch
+  useEffect(() => {
+    setShuffled(shuffleQuotes(quotes));
+  }, []);
 
   const filtered = useMemo(() => {
     return activeCategory === "all"
