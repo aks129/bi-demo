@@ -12,6 +12,7 @@ export default function FridayPage() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [started, setStarted] = useState(false);
+  const [error, setError] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -23,16 +24,18 @@ export default function FridayPage() {
     if (!streaming) inputRef.current?.focus();
   }, [streaming]);
 
-  async function startConversation() {
-    setStarted(true);
-    setStreaming(true);
-    setMessages([{ role: "assistant", content: "" }]);
-
+  async function streamResponse(msgs: Message[], onUpdate: (full: string) => void) {
+    setError("");
     const res = await fetch("/api/friday", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: [] }),
+      body: JSON.stringify({ messages: msgs }),
     });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || `Request failed (${res.status})`);
+    }
 
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
@@ -42,7 +45,28 @@ export default function FridayPage() {
       const { done, value } = await reader.read();
       if (done) break;
       full += decoder.decode(value, { stream: true });
-      setMessages([{ role: "assistant", content: full }]);
+      onUpdate(full);
+    }
+
+    if (!full.trim()) {
+      throw new Error("Empty response received");
+    }
+
+    return full;
+  }
+
+  async function startConversation() {
+    setStarted(true);
+    setStreaming(true);
+    setMessages([{ role: "assistant", content: "" }]);
+
+    try {
+      await streamResponse([], (text) => {
+        setMessages([{ role: "assistant", content: text }]);
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setMessages([{ role: "assistant", content: "I'm here, but I had a little trouble connecting. Could you try sending me a message?" }]);
     }
     setStreaming(false);
   }
@@ -56,21 +80,13 @@ export default function FridayPage() {
     setInput("");
     setStreaming(true);
 
-    const res = await fetch("/api/friday", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: updated }),
-    });
-
-    const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
-    let full = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      full += decoder.decode(value, { stream: true });
-      setMessages([...updated, { role: "assistant", content: full }]);
+    try {
+      await streamResponse(updated, (text) => {
+        setMessages([...updated, { role: "assistant", content: text }]);
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setMessages([...updated, { role: "assistant", content: "I lost my train of thought for a moment. Could you try again?" }]);
     }
     setStreaming(false);
   }
@@ -86,7 +102,6 @@ export default function FridayPage() {
     return (
       <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center px-4">
         <div className="text-center max-w-lg mx-auto animate-fade-in-up">
-          {/* Friday's presence indicator */}
           <div className="relative w-28 h-28 mx-auto mb-8">
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-spirit-400/20 to-ocean-400/20 animate-breathe" />
             <div className="absolute inset-2 rounded-full bg-gradient-to-br from-spirit-500/10 to-ocean-500/10 animate-breathe-ring" />
@@ -137,6 +152,13 @@ export default function FridayPage() {
           <p className="text-white/25 text-[11px]">here with you</p>
         </div>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="mt-2 px-4 py-2 rounded-xl bg-warmth-500/10 border border-warmth-400/20 text-warmth-300/70 text-xs">
+          {error}
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto py-6 space-y-6 scrollbar-thin">
