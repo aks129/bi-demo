@@ -43,7 +43,7 @@ export default function Home() {
       </div>
 
       {/* Navigation Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-3xl mx-auto w-full px-2 animate-fade-in-up delay-500" style={{ animationFillMode: "backwards" }}>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 max-w-4xl mx-auto w-full px-2 animate-fade-in-up delay-500" style={{ animationFillMode: "backwards" }}>
         <NavCard
           href="/quotes"
           icon="❝"
@@ -71,6 +71,13 @@ export default function Home() {
           title="Journal"
           subtitle="Reflect & release"
           gradient="from-warmth-500/20 to-warmth-700/10"
+        />
+        <NavCard
+          href="/friday"
+          icon="☽"
+          title="Friday"
+          subtitle="Talk it through"
+          gradient="from-spirit-500/20 to-ocean-500/10"
         />
       </div>
 

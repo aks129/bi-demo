@@ -9,6 +9,7 @@ const navItems = [
   { href: "/meditate", label: "Meditate", icon: "◎" },
   { href: "/wellness", label: "Wellness", icon: "♡" },
   { href: "/journal", label: "Journal", icon: "✎" },
+  { href: "/friday", label: "Friday", icon: "☽" },
 ];
 
 export default function Navigation() {
