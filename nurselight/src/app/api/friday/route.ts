@@ -69,13 +69,44 @@ async function tryGemini(allMessages: ChatMessage[]) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("No Gemini key");
 
+  // Gemini's OpenAI-compatible endpoint needs the system prompt
+  // folded into the first user message if there's no dedicated support
+  const geminiMessages = allMessages.map((m) => {
+    if (m.role === "system") {
+      return { role: "user" as const, content: `[System Instructions]\n${m.content}` };
+    }
+    return m;
+  });
+
+  // If first two messages are both "user" now, merge them
+  if (
+    geminiMessages.length >= 2 &&
+    geminiMessages[0].role === "user" &&
+    geminiMessages[1].role === "user"
+  ) {
+    geminiMessages[0] = {
+      role: "user",
+      content: geminiMessages[0].content + "\n\n" + geminiMessages[1].content,
+    };
+    geminiMessages.splice(1, 1);
+  }
+
+  // Ensure alternating user/assistant turns for Gemini
+  const cleaned: typeof geminiMessages = [];
+  for (const msg of geminiMessages) {
+    if (cleaned.length > 0 && cleaned[cleaned.length - 1].role === msg.role) {
+      cleaned[cleaned.length - 1].content += "\n\n" + msg.content;
+    } else {
+      cleaned.push({ ...msg });
+    }
+  }
+
   const gemini = getGeminiClient();
   const stream = await gemini.chat.completions.create({
     model: "gemini-2.0-flash",
     stream: true,
     temperature: 0.85,
-    max_tokens: 600,
-    messages: allMessages,
+    messages: cleaned,
   });
 
   return createReadableStream(stream);
