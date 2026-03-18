@@ -72,9 +72,9 @@ function hexToRgba(hex: string, alpha: number) {
 
 // Seeded pseudo-random for deterministic visuals
 function seededRandom(seed: number) {
-  let s = seed;
+  let s = Math.max(1, Math.abs(seed) || 1);
   return () => {
-    s = (s * 16807 + 0) % 2147483647;
+    s = (s * 16807) % 2147483647;
     return (s - 1) / 2147483646;
   };
 }
@@ -107,6 +107,15 @@ function VisualizationCanvas({ feeling, seed }: { feeling: Feeling; seed: number
       phase: rng() * Math.PI * 2,
       color: Math.floor(rng() * 3),
       trail: rng() > 0.6,
+    }));
+
+    // Pre-generate star field for Wonder style
+    const starRng = seededRandom(seed * 3 + 7);
+    const starField = Array.from({ length: 200 }, (_, i) => ({
+      x: starRng() * size,
+      y: starRng() * size,
+      sz: starRng() * 1.5 + 0.3,
+      colorType: i % 5 === 0 ? 0 : i % 3 === 0 ? 1 : 2,
     }));
 
     // Pre-generate nebula blobs
@@ -576,16 +585,14 @@ function VisualizationCanvas({ feeling, seed }: { feeling: Feeling; seed: number
       ctx.fillStyle = "#050510";
       ctx.fillRect(0, 0, size, size);
 
-      // Background star field
-      const rng2 = seededRandom(seed * 3);
-      for (let i = 0; i < 200; i++) {
-        const x = rng2() * size;
-        const y = rng2() * size;
-        const sz = rng2() * 1.5 + 0.3;
+      // Background star field (pre-generated)
+      for (let i = 0; i < starField.length; i++) {
+        const s = starField[i];
         const twinkle = 0.3 + Math.sin(time * 2 + i * 0.8) * 0.3;
         ctx.beginPath();
-        ctx.arc(x, y, sz, 0, Math.PI * 2);
-        ctx.fillStyle = hexToRgba(i % 5 === 0 ? colors[0] : i % 3 === 0 ? colors[1] : "#ffffff", twinkle);
+        ctx.arc(s.x, s.y, s.sz, 0, Math.PI * 2);
+        const c = s.colorType === 0 ? colors[0] : s.colorType === 1 ? colors[1] : "#ffffff";
+        ctx.fillStyle = hexToRgba(c, twinkle);
         ctx.fill();
       }
 
@@ -767,7 +774,7 @@ export default function QuotesPage() {
 
   const generateVisualization = (feeling: Feeling) => {
     setSelectedFeeling(feeling);
-    setVisSeed(Math.floor(Math.random() * 10000));
+    setVisSeed(1 + Math.floor(Math.random() * 9999));
     setShowVis(true);
   };
 
