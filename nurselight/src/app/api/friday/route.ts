@@ -9,14 +9,6 @@ interface ChatMessage {
   content: string;
 }
 
-// Gemini fallback via their OpenAI-compatible endpoint
-function getGeminiClient() {
-  return new OpenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-  });
-}
-
 function streamResponse(readable: ReadableStream<Uint8Array>) {
   return new Response(readable, {
     headers: {
@@ -65,31 +57,36 @@ async function tryOpenAI(allMessages: ChatMessage[]) {
   return createReadableStream(stream);
 }
 
+async function tryGroq(allMessages: ChatMessage[]) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("No Groq key");
+
+  const groq = new OpenAI({
+    apiKey,
+    baseURL: "https://api.groq.com/openai/v1",
+  });
+
+  const stream = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    stream: true,
+    temperature: 0.85,
+    max_tokens: 600,
+    messages: allMessages,
+  });
+
+  return createReadableStream(stream);
+}
+
 async function tryGemini(allMessages: ChatMessage[]) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("No Gemini key");
 
-  // Gemini's OpenAI-compatible endpoint needs the system prompt
-  // folded into the first user message if there's no dedicated support
   const geminiMessages = allMessages.map((m) => {
     if (m.role === "system") {
       return { role: "user" as const, content: `[System Instructions]\n${m.content}` };
     }
     return m;
   });
-
-  // If first two messages are both "user" now, merge them
-  if (
-    geminiMessages.length >= 2 &&
-    geminiMessages[0].role === "user" &&
-    geminiMessages[1].role === "user"
-  ) {
-    geminiMessages[0] = {
-      role: "user",
-      content: geminiMessages[0].content + "\n\n" + geminiMessages[1].content,
-    };
-    geminiMessages.splice(1, 1);
-  }
 
   // Ensure alternating user/assistant turns for Gemini
   const cleaned: typeof geminiMessages = [];
@@ -101,7 +98,11 @@ async function tryGemini(allMessages: ChatMessage[]) {
     }
   }
 
-  const gemini = getGeminiClient();
+  const gemini = new OpenAI({
+    apiKey,
+    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+  });
+
   const stream = await gemini.chat.completions.create({
     model: "gemini-2.0-flash",
     stream: true,
@@ -121,22 +122,27 @@ export async function POST(req: Request) {
       ...messages.slice(-20),
     ];
 
-    // Try OpenAI first, fall back to Gemini
-    try {
-      const readable = await tryOpenAI(allMessages);
-      return streamResponse(readable);
-    } catch (openaiErr) {
-      console.log("OpenAI failed, falling back to Gemini:", openaiErr instanceof Error ? openaiErr.message : openaiErr);
+    // Try OpenAI → Groq → Gemini
+    const providers = [
+      { name: "OpenAI", fn: tryOpenAI },
+      { name: "Groq", fn: tryGroq },
+      { name: "Gemini", fn: tryGemini },
+    ];
 
+    const errors: string[] = [];
+
+    for (const provider of providers) {
       try {
-        const readable = await tryGemini(allMessages);
+        const readable = await provider.fn(allMessages);
         return streamResponse(readable);
-      } catch (geminiErr) {
-        throw new Error(
-          `Both providers failed. OpenAI: ${openaiErr instanceof Error ? openaiErr.message : "unknown"}. Gemini: ${geminiErr instanceof Error ? geminiErr.message : "unknown"}`
-        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "unknown";
+        console.log(`${provider.name} failed: ${msg}`);
+        errors.push(`${provider.name}: ${msg}`);
       }
     }
+
+    throw new Error(`All providers failed. ${errors.join(". ")}`);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return new Response(JSON.stringify({ error: message }), {
