@@ -47,6 +47,74 @@
   --font-serif: "Georgia", "Cambria", "Times New Roman", serif;
 }
 
+/* ──────────────────────────────────────────────
+   Day / Night Theme Variables
+   ────────────────────────────────────────────── */
+
+:root {
+  /* Night theme (default) */
+  --theme-bg: linear-gradient(135deg, #0f0a1a 0%, #1a1025 25%, #0d1b2a 50%, #1a1025 75%, #0f0a1a 100%);
+  --theme-text: #ffffff;
+  --theme-text-muted: rgba(255, 255, 255, 0.5);
+  --theme-text-faint: rgba(255, 255, 255, 0.25);
+  --theme-text-body: rgba(255, 255, 255, 0.8);
+  --theme-glass-bg: rgba(255, 255, 255, 0.03);
+  --theme-glass-border: rgba(255, 255, 255, 0.08);
+  --theme-glass-warm-bg: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(59, 130, 246, 0.05));
+  --theme-glass-warm-border: rgba(168, 85, 247, 0.15);
+  --theme-nav-active-bg: rgba(168, 85, 247, 0.2);
+  --theme-nav-active-border: rgba(192, 132, 252, 0.3);
+  --theme-nav-text: rgba(255, 255, 255, 0.5);
+  --theme-nav-hover: rgba(255, 255, 255, 0.8);
+  --theme-contour-1: rgba(168, 85, 247, 0.06);
+  --theme-contour-2: rgba(59, 130, 246, 0.04);
+  --theme-contour-3: rgba(249, 115, 22, 0.03);
+  --theme-scrollbar-track: rgba(255, 255, 255, 0.02);
+  --theme-scrollbar-thumb: rgba(168, 85, 247, 0.3);
+  --theme-scrollbar-hover: rgba(168, 85, 247, 0.5);
+  --theme-gradient-text: linear-gradient(135deg, #e9d5ff, #c084fc, #93c5fd);
+  --theme-gradient-warm: linear-gradient(135deg, #fde68a, #fdba74, #f9a8d4);
+  --theme-glow-color: rgba(168, 85, 247, 0.2);
+  --theme-glow-strong: rgba(168, 85, 247, 0.4);
+}
+
+[data-theme="day"] {
+  --theme-bg: linear-gradient(135deg, #faf8ff 0%, #f0e6ff 20%, #e8f4fd 40%, #fef9f0 60%, #f0e6ff 80%, #faf8ff 100%);
+  --theme-text: #2d1b4e;
+  --theme-text-muted: rgba(45, 27, 78, 0.55);
+  --theme-text-faint: rgba(45, 27, 78, 0.3);
+  --theme-text-body: rgba(45, 27, 78, 0.75);
+  --theme-glass-bg: rgba(255, 255, 255, 0.55);
+  --theme-glass-border: rgba(168, 85, 247, 0.12);
+  --theme-glass-warm-bg: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(232, 244, 253, 0.4));
+  --theme-glass-warm-border: rgba(168, 85, 247, 0.18);
+  --theme-nav-active-bg: rgba(168, 85, 247, 0.12);
+  --theme-nav-active-border: rgba(168, 85, 247, 0.25);
+  --theme-nav-text: rgba(45, 27, 78, 0.5);
+  --theme-nav-hover: rgba(45, 27, 78, 0.8);
+  --theme-contour-1: rgba(168, 85, 247, 0.08);
+  --theme-contour-2: rgba(59, 130, 246, 0.06);
+  --theme-contour-3: rgba(249, 115, 22, 0.05);
+  --theme-scrollbar-track: rgba(168, 85, 247, 0.04);
+  --theme-scrollbar-thumb: rgba(168, 85, 247, 0.2);
+  --theme-scrollbar-hover: rgba(168, 85, 247, 0.35);
+  --theme-gradient-text: linear-gradient(135deg, #7e22ce, #9333ea, #2563eb);
+  --theme-gradient-warm: linear-gradient(135deg, #d97706, #ea580c, #db2777);
+  --theme-glow-color: rgba(168, 85, 247, 0.1);
+  --theme-glow-strong: rgba(168, 85, 247, 0.2);
+}
+
+/* ──────────────────────────────────────────────
+   Theme Transitions
+   ────────────────────────────────────────────── */
+
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background 0.8s ease, background-color 0.8s ease, color 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -55,11 +123,125 @@ html {
 /* Base body styles */
 body {
   font-family: var(--font-serif);
-  background: linear-gradient(135deg, #0f0a1a 0%, #1a1025 25%, #0d1b2a 50%, #1a1025 75%, #0f0a1a 100%);
+  background: var(--theme-bg);
+  color: var(--theme-text);
   min-height: 100vh;
 }
 
-/* Breathing animation for meditation */
+/* ──────────────────────────────────────────────
+   Contour Decorations
+   ────────────────────────────────────────────── */
+
+.contour-wave {
+  position: fixed;
+  pointer-events: none;
+  z-index: -5;
+}
+
+.contour-wave::before,
+.contour-wave::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* Top-left flowing contour */
+.contour-top {
+  top: -15%;
+  left: -10%;
+  width: 70%;
+  height: 50%;
+}
+
+.contour-top::before {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 30% 50%, var(--theme-contour-1) 0%, transparent 70%);
+  border: 1px solid var(--theme-contour-1);
+  animation: contour-drift 20s ease-in-out infinite;
+}
+
+.contour-top::after {
+  width: 80%;
+  height: 80%;
+  top: 10%;
+  left: 15%;
+  background: radial-gradient(ellipse at 40% 40%, var(--theme-contour-2) 0%, transparent 65%);
+  border: 1px solid var(--theme-contour-2);
+  animation: contour-drift 25s ease-in-out infinite reverse;
+}
+
+/* Bottom-right flowing contour */
+.contour-bottom {
+  bottom: -20%;
+  right: -15%;
+  width: 65%;
+  height: 55%;
+}
+
+.contour-bottom::before {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 60% 50%, var(--theme-contour-2) 0%, transparent 70%);
+  border: 1px solid var(--theme-contour-2);
+  animation: contour-drift 22s ease-in-out infinite;
+}
+
+.contour-bottom::after {
+  width: 70%;
+  height: 75%;
+  bottom: 5%;
+  right: 10%;
+  background: radial-gradient(ellipse at 50% 60%, var(--theme-contour-3) 0%, transparent 60%);
+  border: 1px solid var(--theme-contour-3);
+  animation: contour-drift 28s ease-in-out infinite reverse;
+}
+
+/* Middle accent contour */
+.contour-mid {
+  top: 30%;
+  right: -5%;
+  width: 40%;
+  height: 40%;
+}
+
+.contour-mid::before {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 50%, var(--theme-contour-3) 0%, transparent 65%);
+  border: 1px solid var(--theme-contour-3);
+  animation: contour-float 18s ease-in-out infinite;
+}
+
+@keyframes contour-drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(2%, 3%) rotate(1deg) scale(1.02); }
+  50% { transform: translate(-1%, 5%) rotate(-0.5deg) scale(1.04); }
+  75% { transform: translate(3%, 1%) rotate(0.5deg) scale(1.01); }
+}
+
+@keyframes contour-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3%) rotate(1deg); }
+}
+
+/* Day-specific contour enhancements */
+[data-theme="day"] .contour-top::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(168, 85, 247, 0.06) 0%, rgba(232, 121, 249, 0.03) 40%, transparent 70%);
+}
+
+[data-theme="day"] .contour-bottom::before {
+  background: radial-gradient(ellipse at 60% 50%, rgba(96, 165, 250, 0.06) 0%, rgba(147, 197, 253, 0.03) 40%, transparent 70%);
+}
+
+[data-theme="day"] .contour-mid::before {
+  background: radial-gradient(ellipse at 50% 50%, rgba(251, 146, 60, 0.04) 0%, rgba(253, 186, 116, 0.02) 40%, transparent 65%);
+}
+
+/* ──────────────────────────────────────────────
+   Breathing & Motion Animations
+   ────────────────────────────────────────────── */
+
 @keyframes breathe {
   0%, 100% { transform: scale(1); opacity: 0.6; }
   50% { transform: scale(1.15); opacity: 1; }
@@ -86,8 +268,8 @@ body {
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.4); }
+  0%, 100% { box-shadow: 0 0 20px var(--theme-glow-color); }
+  50% { box-shadow: 0 0 40px var(--theme-glow-strong); }
 }
 
 @keyframes pulse-soft {
@@ -140,35 +322,52 @@ body {
 .delay-700 { animation-delay: 0.7s; }
 .delay-1000 { animation-delay: 1s; }
 
-/* Glass morphism card */
+/* ──────────────────────────────────────────────
+   Glass Morphism
+   ────────────────────────────────────────────── */
+
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--theme-glass-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--theme-glass-border);
+}
+
+[data-theme="day"] .glass {
+  box-shadow: 0 4px 30px rgba(168, 85, 247, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .glass-warm {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(59, 130, 246, 0.05));
+  background: var(--theme-glass-warm-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(168, 85, 247, 0.15);
+  border: 1px solid var(--theme-glass-warm-border);
 }
 
-/* Gradient text */
+[data-theme="day"] .glass-warm {
+  box-shadow: 0 8px 40px rgba(168, 85, 247, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+/* ──────────────────────────────────────────────
+   Gradient Text
+   ────────────────────────────────────────────── */
+
 .text-gradient {
-  background: linear-gradient(135deg, #e9d5ff, #c084fc, #93c5fd);
+  background: var(--theme-gradient-text);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-warm {
-  background: linear-gradient(135deg, #fde68a, #fdba74, #f9a8d4);
+  background: var(--theme-gradient-warm);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Stars background */
+/* ──────────────────────────────────────────────
+   Stars (night only)
+   ────────────────────────────────────────────── */
+
 .stars {
   background-image: radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
                     radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
@@ -178,25 +377,85 @@ body {
   background-size: 200px 100px;
 }
 
-/* Custom scrollbar */
+[data-theme="day"] .stars {
+  opacity: 0;
+}
+
+/* ──────────────────────────────────────────────
+   Custom Scrollbar
+   ────────────────────────────────────────────── */
+
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--theme-scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.3);
+  background: var(--theme-scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.5);
+  background: var(--theme-scrollbar-hover);
 }
 
 /* Textarea styling */
 textarea:focus {
   outline: none;
+}
+
+/* ──────────────────────────────────────────────
+   Day-mode text overrides
+   Adapts white/* opacity classes for dark text
+   ────────────────────────────────────────────── */
+
+/* ──────────────────────────────────────────────
+   Day-mode: remap white-opacity text to dark
+   ────────────────────────────────────────────── */
+
+[data-theme="day"] {
+  color: var(--theme-text);
+}
+
+/* Map white/opacity text utilities to dark equivalents in day mode.
+   Uses the cascade: [data-theme] selector has higher specificity than
+   bare utility classes. */
+[data-theme="day"] [class*="text-white/"] {
+  color: var(--theme-text-muted) !important;
+}
+
+/* Keep spirit-colored text visible in day mode */
+[data-theme="day"] [class*="text-spirit-"] {
+  /* These remain as-is — spirit colors work on light backgrounds */
+}
+
+/* Adjust placeholder text */
+[data-theme="day"] [class*="placeholder-white"],
+[data-theme="day"] [class*="placeholder:text-white"] {
+  --tw-placeholder-opacity: 1;
+}
+[data-theme="day"] textarea::placeholder,
+[data-theme="day"] input::placeholder {
+  color: var(--theme-text-faint) !important;
+}
+
+/* Adjust border colors */
+[data-theme="day"] [class*="border-white/"] {
+  border-color: rgba(168, 85, 247, 0.1) !important;
+}
+
+/* Adjust bg-white opacity for hover states */
+[data-theme="day"] [class*="bg-white/"] {
+  background-color: rgba(168, 85, 247, 0.04) !important;
+}
+[data-theme="day"] [class*="hover:bg-white/"]:hover {
+  background-color: rgba(168, 85, 247, 0.08) !important;
+}
+
+/* Friday chat status dot background in day mode */
+[data-theme="day"] [class*="border-\\["] {
+  border-color: var(--theme-glass-bg) !important;
 }
