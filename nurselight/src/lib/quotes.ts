@@ -211,6 +211,15 @@ export function getRandomQuote(category?: Quote["category"]): Quote {
   return filtered[Math.floor(Math.random() * filtered.length)];
 }
 
+export function shuffleQuotes(arr: Quote[]): Quote[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export const categoryLabels: Record<Quote["category"], string> = {
   stoicism: "Inner Strength",
   compassion: "Compassion",
